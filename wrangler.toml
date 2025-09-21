@@ -1,6 +1,7 @@
 name = "client-portal"
 main = "server.js"
-compatibility_date = "2024-09-21"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
 [env.production]
 name = "client-portal-prod"
