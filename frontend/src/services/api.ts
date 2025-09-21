@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { AuthResponse, ApiResponse, PaginatedResponse, User, Form, Submission } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://portal.qially.com/api';
 
 // Create axios instance
 const api = axios.create({
