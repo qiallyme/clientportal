@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
+const User = require('../models/SupabaseUser');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -96,7 +96,7 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Check for user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
