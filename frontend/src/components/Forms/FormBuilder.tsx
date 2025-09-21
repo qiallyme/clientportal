@@ -35,7 +35,7 @@ const FormBuilder: React.FC = () => {
       fetchForm(id);
     }
     return () => clearError();
-  }, [isEditing, id]);
+  }, [isEditing, id, fetchForm, clearError]);
 
   useEffect(() => {
     if (isEditing && currentForm) {

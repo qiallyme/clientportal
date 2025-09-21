@@ -14,7 +14,7 @@ const FormViewer: React.FC = () => {
       fetchForm(id);
     }
     return () => clearError();
-  }, [id]);
+  }, [id, fetchForm, clearError]);
 
   if (loading) {
     return (

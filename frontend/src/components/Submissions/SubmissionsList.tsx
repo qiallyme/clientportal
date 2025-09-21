@@ -40,7 +40,7 @@ const SubmissionsList: React.FC = () => {
       sortOrder: filters.sortOrder,
     });
     fetchStats();
-  }, [filters]);
+  }, [filters, fetchSubmissions, fetchStats]);
 
   const handleDelete = async (id: string, submissionNumber: string) => {
     if (window.confirm(`Are you sure you want to delete submission ${submissionNumber}?`)) {

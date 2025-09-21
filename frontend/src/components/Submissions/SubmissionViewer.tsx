@@ -19,16 +19,16 @@ const SubmissionViewer: React.FC = () => {
       fetchSubmission(id);
     }
     return () => clearError();
-  }, [id]);
+  }, [id, fetchSubmission, clearError]);
 
   useEffect(() => {
     if (currentSubmission?.formId) {
-      const formId = typeof currentSubmission.formId === 'object' 
-        ? currentSubmission.formId._id 
+      const formId = typeof currentSubmission.formId === 'object'
+        ? currentSubmission.formId._id
         : currentSubmission.formId;
       fetchForm(formId);
     }
-  }, [currentSubmission?.formId]);
+  }, [currentSubmission?.formId, fetchForm]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();

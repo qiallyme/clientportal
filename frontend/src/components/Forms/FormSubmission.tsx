@@ -21,7 +21,7 @@ const FormSubmission: React.FC = () => {
       fetchFormForSubmission(id);
     }
     return () => clearError();
-  }, [id]);
+  }, [id, fetchFormForSubmission, clearError]);
 
   useEffect(() => {
     // Check if user needs to be authenticated

@@ -17,7 +17,7 @@ const FormsList: React.FC = () => {
       search: searchTerm || undefined,
       isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
     });
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, fetchForms]);
 
   const handleDelete = async (id: string, title: string) => {
     if (window.confirm(`Are you sure you want to delete the form "${title}"?`)) {

@@ -30,7 +30,7 @@ const SubmissionEditor: React.FC = () => {
       fetchSubmission(id);
     }
     return () => clearError();
-  }, [id]);
+  }, [id, fetchSubmission, clearError]);
 
   useEffect(() => {
     if (currentSubmission) {
