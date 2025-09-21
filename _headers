@@ -1,0 +1,18 @@
+# Cloudflare Pages Headers
+# Security headers for production
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/api/*
+  Access-Control-Allow-Origin: https://your-domain.com
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
+  Access-Control-Allow-Credentials: true
+
+/static/*
+  Cache-Control: public, max-age=31536000, immutable

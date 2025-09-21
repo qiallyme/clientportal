@@ -1,0 +1,23 @@
+name = "client-portal"
+main = "server.js"
+compatibility_date = "2024-09-21"
+
+[env.production]
+name = "client-portal-prod"
+
+# Environment variables (set these in Cloudflare dashboard)
+# SUPABASE_URL = "https://vwqkhjnkummwtvfxgqml.supabase.co"
+# SUPABASE_ANON_KEY = "sb_publishable_I7JH7fI8hWP1AtGKskpWew_E4ws1YDa"
+# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key-here"
+# JWT_SECRET = "your-super-secret-jwt-key-change-in-production"
+# JWT_EXPIRE = "7d"
+# NODE_ENV = "production"
+# REGION = "us"
+# CLIENT_URL = "https://your-domain.com"
+
+[build]
+command = "npm run build"
+
+[[routes]]
+pattern = "api.your-domain.com/*"
+zone_name = "your-domain.com"
