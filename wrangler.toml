@@ -1,7 +1,6 @@
 name = "client-portal"
-main = "server.js"
+main = "worker.js"
 compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
 
 [env.production]
 name = "client-portal-prod"
@@ -22,6 +21,6 @@ command = "cd frontend && npm install && npm run build"
 # For Pages deployment
 pages_build_output_dir = "frontend/build"
 
-[[routes]]
-pattern = "api.your-domain.com/*"
-zone_name = "your-domain.com"
+# [[routes]]
+# pattern = "api.your-domain.com/*"
+# zone_name = "your-domain.com"
