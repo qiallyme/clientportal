@@ -10,14 +10,9 @@ JWT_ISSUER = "clientportal"
 enabled = true
 head_sampling_rate = 1
 
-# Build caching configuration
+# Build configuration
 [build]
 command = "npm run build:worker"
 cwd = "."
-
-# Cache configuration for faster builds
-[build.upload]
-format = "modules"
-main = "dist/index.js"
 
 # set with: wrangler secret put SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY
