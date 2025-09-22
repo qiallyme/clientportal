@@ -27,7 +27,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'https://api.qially.com';
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
     });

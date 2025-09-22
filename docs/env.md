@@ -1,6 +1,7 @@
 # Environment Configuration
 
 ## JWT claims required by Worker
+
 ```json
 {
   "iss": "clientportal",

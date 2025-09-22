@@ -15,6 +15,7 @@ A modern, real-time client portal built with the MERN stack, designed to work se
 ## 🛠 Tech Stack
 
 ### Backend
+
 - **Node.js** with Express.js
 - **MongoDB** with Mongoose
 - **Socket.io** for real-time communication
@@ -23,6 +24,7 @@ A modern, real-time client portal built with the MERN stack, designed to work se
 - **Express Rate Limiting** for API protection
 
 ### Frontend
+
 - **React** with TypeScript
 - **React Router** for navigation
 - **Axios** for API calls
@@ -38,6 +40,7 @@ A modern, real-time client portal built with the MERN stack, designed to work se
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd client-portal
@@ -46,11 +49,13 @@ cd client-portal
 ### 2. Install Dependencies
 
 #### Backend
+
 ```bash
 npm install
 ```
 
 #### Frontend
+
 ```bash
 cd client
 npm install
@@ -59,11 +64,13 @@ npm install
 ### 3. Environment Configuration
 
 #### Backend (.env)
+
 ```bash
 cp env.example .env
 ```
 
 Edit `.env` with your configuration:
+
 ```env
 # Database
 MONGODB_URI=mongodb://localhost:27017/client-portal
@@ -77,32 +84,35 @@ PORT=5000
 NODE_ENV=development
 REGION=us
 
-# Client URL (development)
-CLIENT_URL=http://localhost:3000
 # Client URL (production)
-# CLIENT_URL=https://portal.qially.com
+CLIENT_URL=https://portal.qially.com
+# Client URL (development)
+# CLIENT_URL=http://localhost:3000
 ```
 
 #### Frontend (client/.env)
+
 ```bash
 cd client
 cp env.example .env
 ```
 
 Edit `client/.env`:
-```env
-# Development URLs
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_SOCKET_URL=http://localhost:5000
 
-# Production URLs (uncomment for production)
-# REACT_APP_API_URL=https://api.qially.com
-# REACT_APP_SOCKET_URL=https://api.qially.com
+```env
+# Production URLs
+REACT_APP_API_URL=https://api.qially.com
+REACT_APP_SOCKET_URL=https://api.qially.com
+
+# Development URLs (uncomment for local development)
+# REACT_APP_API_URL=http://localhost:5000/api
+# REACT_APP_SOCKET_URL=http://localhost:5000
 ```
 
 ### 4. Start the Application
 
 #### Development Mode
+
 ```bash
 # Start backend (from root directory)
 npm run dev
@@ -113,6 +123,7 @@ npm start
 ```
 
 #### Production Mode
+
 ```bash
 # Build frontend
 npm run build
@@ -126,11 +137,13 @@ npm start
 ### Recommended Infrastructure
 
 #### For US Region:
+
 - **Hosting**: AWS, Google Cloud, or DigitalOcean
 - **Database**: MongoDB Atlas (US region)
 - **CDN**: CloudFlare or AWS CloudFront
 
 #### For China Region:
+
 - **Hosting**: Alibaba Cloud, Tencent Cloud, or AWS China
 - **Database**: MongoDB Atlas (Asia Pacific region)
 - **CDN**: Alibaba Cloud CDN or Tencent Cloud CDN
@@ -138,17 +151,20 @@ npm start
 ### Deployment Steps
 
 1. **Set up MongoDB Atlas**:
+
    - Create clusters in both US and China regions
    - Configure replica sets for high availability
    - Set up proper security groups
 
 2. **Deploy Backend**:
+
    ```bash
    # Build and deploy to your hosting provider
    npm run build
    ```
 
 3. **Deploy Frontend**:
+
    ```bash
    cd client
    npm run build
@@ -170,6 +186,7 @@ npm start
 ## 📚 API Documentation
 
 ### Authentication Endpoints
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
 - `GET /api/auth/me` - Get current user
@@ -177,6 +194,7 @@ npm start
 - `PUT /api/auth/change-password` - Change password
 
 ### Forms Endpoints
+
 - `GET /api/forms` - Get all forms
 - `POST /api/forms` - Create new form
 - `GET /api/forms/:id` - Get single form
@@ -184,6 +202,7 @@ npm start
 - `DELETE /api/forms/:id` - Delete form
 
 ### Submissions Endpoints
+
 - `GET /api/submissions` - Get all submissions
 - `POST /api/submissions` - Create new submission
 - `GET /api/submissions/:id` - Get single submission
@@ -191,6 +210,7 @@ npm start
 - `POST /api/submissions/:id/notes` - Add note to submission
 
 ### Users Endpoints (Admin only)
+
 - `GET /api/users` - Get all users
 - `POST /api/users` - Create new user
 - `PUT /api/users/:id` - Update user
@@ -225,6 +245,7 @@ npm start
 ## 🔧 Development
 
 ### Project Structure
+
 ```
 client-portal/
 ├── models/           # MongoDB models
@@ -244,11 +265,13 @@ client-portal/
 ### Available Scripts
 
 #### Backend
+
 - `npm start` - Start production server
 - `npm run dev` - Start development server with nodemon
 - `npm run client` - Start React development server
 
 #### Frontend
+
 - `npm start` - Start React development server
 - `npm run build` - Build for production
 - `npm test` - Run tests
@@ -268,6 +291,7 @@ This project is licensed under the MIT License.
 ## 🆘 Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation
@@ -275,6 +299,7 @@ For support and questions:
 ## 🔄 Updates
 
 The application includes real-time updates for:
+
 - New form submissions
 - Submission status changes
 - User activity

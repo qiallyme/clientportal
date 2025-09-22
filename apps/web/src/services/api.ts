@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { AuthResponse, ApiResponse, PaginatedResponse, User, Form, Submission } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://client-portal.qilife.workers.dev';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.qially.com';
 
 // Create axios instance
 const api = axios.create({
