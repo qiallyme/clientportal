@@ -3,7 +3,7 @@
 ## JWT claims required by Worker
 ```json
 {
-  "iss": "qieos",
+  "iss": "clientportal",
   "sub": "<user uuid>",
   "org_id": "<org uuid>",
   "role": "admin|internal|external",

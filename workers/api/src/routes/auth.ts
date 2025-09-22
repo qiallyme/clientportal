@@ -427,7 +427,7 @@ auth.post("/api/auth/dev-login", async (c) => {
     console.log("Origin:", c.req.header("origin"));
     console.log("Referer:", c.req.header("referer"));
     
-    if (c.env.JWT_ISSUER !== "qieos") return c.json({error:"disabled"}, 403); // simple guard
+    if (c.env.JWT_ISSUER !== "clientportal") return c.json({error:"disabled"}, 403); // simple guard
     const { email = "crice4485@gmail.com" } = await c.req.json().catch(()=>({}));
     console.log("Email:", email);
     

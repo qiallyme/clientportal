@@ -1,10 +1,10 @@
-name = "client-portal"
+name = "clientportal-api"
 main = "src/index.ts"
 compatibility_date = "2025-09-10"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-JWT_ISSUER = "qieos"
+JWT_ISSUER = "clientportal"
 
 [observability]
 enabled = true
