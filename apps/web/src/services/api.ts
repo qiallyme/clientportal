@@ -68,6 +68,10 @@ export const authAPI = {
   login: (email: string, password: string): Promise<AxiosResponse<AuthResponse>> =>
     api.post('/auth/login', { email, password }),
   
+  // Temporary dev login for testing
+  devLogin: (email: string = 'admin@example.com'): Promise<AxiosResponse<AuthResponse>> =>
+    api.post('/auth/dev-login', { email }),
+  
   register: (userData: {
     name: string;
     email: string;

@@ -104,8 +104,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (token && user) {
         try {
-          const userData = JSON.parse(user);
-          
           // Try to validate the token by calling /api/auth/me
           const response = await authAPI.getMe();
           

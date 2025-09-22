@@ -72,7 +72,7 @@ async function testAuthFlow() {
     }
     
     // Validate user object structure
-    const user = meResponse.data;
+    const user = meResponse.data.data || meResponse.data; // Handle both old and new formats
     const requiredFields = ['id', 'name', 'email', 'role', 'permissions'];
     for (const field of requiredFields) {
       if (!user[field]) {
