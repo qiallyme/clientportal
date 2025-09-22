@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "client-portal-web",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

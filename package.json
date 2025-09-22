@@ -1,5 +1,5 @@
 {
-  "name": "client-portal",
+  "name": "clientportal",
   "version": "1.0.0",
   "description": "QiAlly Portal - Client portal with Supabase authentication",
   "type": "module",
