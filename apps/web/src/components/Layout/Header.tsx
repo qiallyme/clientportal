@@ -32,7 +32,7 @@ const Header: React.FC = () => {
               <Link to="/forms" className="nav-link">
                 Forms
               </Link>
-              {user.role === 'admin' && (
+              {user?.user_metadata?.role === 'admin' && (
                 <>
                   <Link to="/submissions" className="nav-link">
                     Submissions
@@ -54,10 +54,10 @@ const Header: React.FC = () => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
                 <div className="user-avatar">
-                  {user.name.charAt(0).toUpperCase()}
+                  {user.user_metadata?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                 </div>
-                <span className="user-name">{user.name}</span>
-                <span className="user-role">({user.role})</span>
+                <span className="user-name">{user.user_metadata?.name || user.email}</span>
+                <span className="user-role">({user.user_metadata?.role || 'user'})</span>
               </button>
 
               {showUserMenu && (
