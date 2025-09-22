@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { Submission } from '../types';
 import { submissionsAPI } from '../services/api';
 
@@ -133,7 +133,7 @@ interface SubmissionsProviderProps {
 export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(submissionsReducer, initialState);
 
-  const fetchSubmissions = async (params?: {
+  const fetchSubmissions = useCallback(async (params?: {
     page?: number;
     limit?: number;
     status?: string;
@@ -167,9 +167,9 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
         payload: error.response?.data?.message || 'Failed to fetch submissions',
       });
     }
-  };
+  }, []);
 
-  const fetchSubmission = async (id: string) => {
+  const fetchSubmission = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'SUBMISSIONS_LOADING' });
       const response = await submissionsAPI.getSubmission(id);
@@ -183,9 +183,9 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
         payload: error.response?.data?.message || 'Failed to fetch submission',
       });
     }
-  };
+  }, []);
 
-  const updateSubmission = async (id: string, submissionData: Partial<Submission>): Promise<Submission> => {
+  const updateSubmission = useCallback(async (id: string, submissionData: Partial<Submission>): Promise<Submission> => {
     try {
       dispatch({ type: 'SUBMISSIONS_LOADING' });
       const response = await submissionsAPI.updateSubmission(id, submissionData);
@@ -210,9 +210,9 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
       });
       throw error;
     }
-  };
+  }, [fetchSubmissions, state.currentSubmission?._id]);
 
-  const deleteSubmission = async (id: string) => {
+  const deleteSubmission = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'SUBMISSIONS_LOADING' });
       await submissionsAPI.deleteSubmission(id);
@@ -230,9 +230,9 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
         payload: error.response?.data?.message || 'Failed to delete submission',
       });
     }
-  };
+  }, [fetchSubmissions, state.currentSubmission?._id]);
 
-  const addNote = async (id: string, note: { text: string }): Promise<Submission> => {
+  const addNote = useCallback(async (id: string, note: { text: string }): Promise<Submission> => {
     try {
       dispatch({ type: 'SUBMISSIONS_LOADING' });
       const response = await submissionsAPI.addNote(id, note);
@@ -254,9 +254,9 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
       });
       throw error;
     }
-  };
+  }, [state.currentSubmission?._id]);
 
-  const fetchStats = async (period?: string) => {
+  const fetchStats = useCallback(async (period?: string) => {
     try {
       const response = await submissionsAPI.getStats(period);
       dispatch({
@@ -266,15 +266,15 @@ export const SubmissionsProvider: React.FC<SubmissionsProviderProps> = ({ childr
     } catch (error: any) {
       console.error('Failed to fetch stats:', error);
     }
-  };
+  }, []);
 
-  const clearCurrentSubmission = () => {
+  const clearCurrentSubmission = useCallback(() => {
     dispatch({ type: 'CLEAR_CURRENT_SUBMISSION' });
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
-  };
+  }, []);
 
   const value: SubmissionsContextType = {
     ...state,

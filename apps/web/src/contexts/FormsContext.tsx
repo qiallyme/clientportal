@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { Form } from '../types';
 import { formsAPI } from '../services/api';
 
@@ -113,7 +113,7 @@ interface FormsProviderProps {
 export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(formsReducer, initialState);
 
-  const fetchForms = async (params?: {
+  const fetchForms = useCallback(async (params?: {
     page?: number;
     limit?: number;
     search?: string;
@@ -142,9 +142,9 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         payload: error.response?.data?.message || 'Failed to fetch forms',
       });
     }
-  };
+  }, []);
 
-  const fetchForm = async (id: string) => {
+  const fetchForm = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
       const response = await formsAPI.getForm(id);
@@ -158,9 +158,9 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         payload: error.response?.data?.message || 'Failed to fetch form',
       });
     }
-  };
+  }, []);
 
-  const fetchFormForSubmission = async (id: string) => {
+  const fetchFormForSubmission = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
       const response = await formsAPI.getFormForSubmission(id);
@@ -174,9 +174,9 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         payload: error.response?.data?.message || 'Failed to fetch form',
       });
     }
-  };
+  }, []);
 
-  const createForm = async (formData: Partial<Form>): Promise<Form> => {
+  const createForm = useCallback(async (formData: Partial<Form>): Promise<Form> => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
       const response = await formsAPI.createForm(formData);
@@ -193,9 +193,9 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, [fetchForms]);
 
-  const updateForm = async (id: string, formData: Partial<Form>): Promise<Form> => {
+  const updateForm = useCallback(async (id: string, formData: Partial<Form>): Promise<Form> => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
       const response = await formsAPI.updateForm(id, formData);
@@ -220,9 +220,9 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, [fetchForms, state.currentForm?._id]);
 
-  const deleteForm = async (id: string) => {
+  const deleteForm = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
       await formsAPI.deleteForm(id);
@@ -240,15 +240,15 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         payload: error.response?.data?.message || 'Failed to delete form',
       });
     }
-  };
+  }, [fetchForms, state.currentForm?._id]);
 
-  const clearCurrentForm = () => {
+  const clearCurrentForm = useCallback(() => {
     dispatch({ type: 'CLEAR_CURRENT_FORM' });
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
-  };
+  }, []);
 
   const value: FormsContextType = {
     ...state,
