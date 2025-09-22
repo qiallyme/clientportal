@@ -171,7 +171,7 @@ const FormsList: React.FC = () => {
                     Edit
                   </Link>
                 )}
-                {user?.role === 'admin' && (
+                {userProfile?.role === 'admin' && (
                   <Link to={`/forms/${form._id}/submissions`} className="btn btn-outline">
                     Submissions
                   </Link>

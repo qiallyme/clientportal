@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useSocket } from '../../contexts/SocketContext';
-import { submissionsAPI, formsAPI } from '../../services/api';
-import { Submission, Form } from '../../types';
+import { submissionsAPI, formsAPI, authAPI } from '../../services/api';
+import { Submission, Form, User } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const { user } = useSupabaseAuth();
+  const { user: supabaseUser, isAuthenticated } = useSupabaseAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const { socket, joinRoom } = useSocket();
   const [stats, setStats] = useState({
     totalSubmissions: 0,
@@ -17,6 +18,26 @@ const Dashboard: React.FC = () => {
   const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>([]);
   const [recentForms, setRecentForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && supabaseUser) {
+        try {
+          const response = await authAPI.getMe();
+          if (response.data.success && response.data.data) {
+            setUserProfile(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
     loadDashboardData();
@@ -84,7 +105,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h1>Welcome back, {user?.name}!</h1>
+        <h1>Welcome back, {userProfile?.name || 'User'}!</h1>
         <p>Here's what's happening with your portal today.</p>
       </div>
 
@@ -116,7 +137,7 @@ const Dashboard: React.FC = () => {
         <div className="stat-card">
           <div className="stat-icon">👥</div>
           <div className="stat-content">
-            <h3>{user?.role}</h3>
+            <h3>{userProfile?.role || 'User'}</h3>
             <p>Your Role</p>
           </div>
         </div>

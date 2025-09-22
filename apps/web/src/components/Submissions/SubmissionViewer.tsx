@@ -3,16 +3,39 @@ import { useParams, Link } from 'react-router-dom';
 import { useSubmissions } from '../../contexts/SubmissionsContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useForms } from '../../contexts/FormsContext';
+import { User } from '../../types';
+import { authAPI } from '../../services/api';
 import './SubmissionViewer.css';
 
 const SubmissionViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentSubmission, loading, error, fetchSubmission, clearError, addNote } = useSubmissions();
-  const { user } = useSupabaseAuth();
+  const { user: supabaseUser, isAuthenticated } = useSupabaseAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const { fetchForm } = useForms();
   
   const [newNote, setNewNote] = useState('');
   const [addingNote, setAddingNote] = useState(false);
+
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && supabaseUser) {
+        try {
+          const response = await authAPI.getMe();
+          if (response.data.success && response.data.data) {
+            setUserProfile(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
     if (id) {
@@ -116,7 +139,7 @@ const SubmissionViewer: React.FC = () => {
           </div>
         </div>
         <div className="header-actions">
-          {user?.permissions.canEditSubmissions && (
+          {userProfile?.permissions.canEditSubmissions && (
             <Link to={`/submissions/${currentSubmission._id}/edit`} className="btn btn-outline">
               Edit Submission
             </Link>
@@ -281,7 +304,7 @@ const SubmissionViewer: React.FC = () => {
               )}
             </div>
 
-            {user?.permissions.canEditSubmissions && (
+            {userProfile?.permissions.canEditSubmissions && (
               <form onSubmit={handleAddNote} className="add-note-form">
                 <textarea
                   value={newNote}
