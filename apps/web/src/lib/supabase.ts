@@ -1,8 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://vwqkhjnkummwtvfxgqml.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3cWtoam5rdW1td3R2ZnhncW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMDMwNDksImV4cCI6MjA3MTU3OTA0OX0.Q1_W-sq8iKVPfJ2HfTS2hGNmK5jjzsy50cHszhB_6VQ';
+// Supabase configuration with validation
+const envSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const envSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Use environment variables if they're valid, otherwise use fallbacks
+const supabaseUrl = (envSupabaseUrl && envSupabaseUrl.startsWith('http')) 
+  ? envSupabaseUrl 
+  : 'https://vwqkhjnkummwtvfxgqml.supabase.co';
+
+const supabaseAnonKey = (envSupabaseAnonKey && envSupabaseAnonKey.length > 50) 
+  ? envSupabaseAnonKey 
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3cWtoam5rdW1td3R2ZnhncW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMDMwNDksImV4cCI6MjA3MTU3OTA0OX0.Q1_W-sq8iKVPfJ2HfTS2hGNmK5jjzsy50cHszhB_6VQ';
+
+// Debug logging (remove in production)
+console.log('Supabase Config:', {
+  envUrl: envSupabaseUrl,
+  envKey: envSupabaseAnonKey ? `${envSupabaseAnonKey.substring(0, 20)}...` : 'undefined',
+  finalUrl: supabaseUrl,
+  finalKey: `${supabaseAnonKey.substring(0, 20)}...`
+});
 
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
