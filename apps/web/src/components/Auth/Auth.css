@@ -7,6 +7,123 @@
   padding: 20px;
 }
 
+/* Enterprise split-screen layout */
+.auth-container.enterprise {
+  background: #f8fafc;
+  padding: 0;
+}
+
+.auth-container.enterprise .auth-card {
+  max-width: none;
+  width: 100%;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+.auth-left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  background: white;
+  position: relative;
+}
+
+.auth-right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-right-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-branding-container {
+  text-align: center;
+  z-index: 1;
+  position: relative;
+}
+
+.auth-branding-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.auth-branding-container p {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.auth-features {
+  margin-top: 3rem;
+  text-align: left;
+  max-width: 400px;
+}
+
+.auth-feature {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.auth-feature-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.auth-feature-text {
+  font-size: 0.95rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .auth-container.enterprise .auth-card {
+    flex-direction: column;
+  }
+  
+  .auth-right-panel {
+    display: none;
+  }
+  
+  .auth-left-panel {
+    padding: 40px 20px;
+  }
+}
+
 .auth-card {
   background: white;
   border-radius: 12px;

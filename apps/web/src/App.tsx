@@ -5,9 +5,9 @@ import { SocketProvider } from './contexts/SocketContext';
 import { FormsProvider } from './contexts/FormsContext';
 import { SubmissionsProvider } from './contexts/SubmissionsContext';
 import Layout from './components/Layout/Layout';
-import SupabaseLogin from './components/Auth/SupabaseLogin';
+import EnterpriseLogin from './components/Auth/EnterpriseLogin';
 import Register from './components/Auth/Register';
-import SupabaseMagicLink from './components/Auth/SupabaseMagicLink';
+import EnterpriseMagicLink from './components/Auth/EnterpriseMagicLink';
 import AuthCallback from './components/Auth/AuthCallback';
 import Dashboard from './components/Dashboard/Dashboard';
 import { FormsList, FormBuilder, FormViewer, FormSubmission } from './components/Forms';
@@ -68,7 +68,7 @@ const AppRoutes: React.FC = () => {
         path="/login"
         element={
           <PublicRoute>
-            <SupabaseLogin />
+            <EnterpriseLogin />
           </PublicRoute>
         }
       />
@@ -84,7 +84,7 @@ const AppRoutes: React.FC = () => {
         path="/magic-link"
         element={
           <PublicRoute>
-            <SupabaseMagicLink />
+            <EnterpriseMagicLink />
           </PublicRoute>
         }
       />

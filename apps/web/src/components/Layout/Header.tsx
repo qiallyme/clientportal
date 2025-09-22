@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import QiSuiteLogo from '../Branding/QiSuiteLogo';
 import './Header.css';
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/login');
   };
 
@@ -18,7 +19,7 @@ const Header: React.FC = () => {
       <div className="header-container">
         <div className="header-left">
           <Link to="/" className="logo">
-            <h1>Client Portal</h1>
+            <QiSuiteLogo size="medium" variant="full" />
           </Link>
         </div>
 
