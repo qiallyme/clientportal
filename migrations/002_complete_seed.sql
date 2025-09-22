@@ -109,13 +109,13 @@ ON CONFLICT (id) DO NOTHING;
 -- Update existing admin user to belong to default org
 UPDATE public.users 
 SET org_id = '00000000-0000-0000-0000-000000000001'
-WHERE email = 'admin@example.com' AND org_id IS NULL;
+WHERE email = 'crice4485@gmail.com' AND org_id IS NULL;
 
 -- If no admin user exists, create one
 INSERT INTO public.users (name, email, password, role, region, is_active, permissions, org_id)
 VALUES (
-  'Admin User',
-  'admin@example.com',
+  'Chris Rice',
+  'crice4485@gmail.com',
   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- password: 'password'
   'admin',
   'global',
@@ -163,4 +163,4 @@ SELECT
   o.name as org_name
 FROM public.users u
 JOIN public.organizations o ON u.org_id = o.id
-WHERE u.email = 'admin@example.com';
+WHERE u.email = 'crice4485@gmail.com';

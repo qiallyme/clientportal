@@ -7,7 +7,7 @@
 import https from 'https';
 
 const API_BASE = 'https://client-portal.qilife.workers.dev';
-const TEST_EMAIL = 'admin@example.com';
+const TEST_EMAIL = 'crice4485@gmail.com';
 const TEST_PASSWORD = 'password123'; // This will be accepted for now since we don't have password verification yet
 
 async function makeRequest(url, options = {}) {

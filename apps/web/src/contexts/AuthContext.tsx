@@ -22,6 +22,8 @@ interface AuthContextType extends AuthState {
   refreshToken: () => Promise<void>;
   updateProfile: (userData: { name?: string; email?: string }) => Promise<void>;
   changePassword: (passwords: { currentPassword: string; newPassword: string }) => Promise<void>;
+  requestMagicLink: (email: string) => Promise<{ magicToken?: string; expiresIn: number }>;
+  verifyMagicLink: (magicToken: string) => Promise<void>;
 }
 
 type AuthAction =
@@ -239,6 +241,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const requestMagicLink = async (email: string) => {
+    try {
+      const response = await authAPI.requestMagicLink(email);
+      return {
+        magicToken: response.data.magicToken,
+        expiresIn: response.data.expiresIn
+      };
+    } catch (error: any) {
+      throw error.response?.data?.message || 'Failed to request magic link';
+    }
+  };
+
+  const verifyMagicLink = async (magicToken: string) => {
+    try {
+      dispatch({ type: 'AUTH_START' });
+      const response = await authAPI.verifyMagicLink(magicToken);
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user, token },
+      });
+    } catch (error: any) {
+      dispatch({ type: 'AUTH_FAIL' });
+      throw error.response?.data?.message || 'Magic link verification failed';
+    }
+  };
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -247,6 +280,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshToken,
     updateProfile,
     changePassword,
+    requestMagicLink,
+    verifyMagicLink,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

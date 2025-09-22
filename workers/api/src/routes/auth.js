@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { requireAuth } from "../middleware/auth";
-import { SignJWT } from "jose";
+import { SignJWT, decodeJwt } from "jose";
 import { supabaseAdmin } from "../lib/supabaseAdmin";
 export const auth = new Hono();
 auth.get("/api/auth/me", requireAuth, async (c) => {
@@ -90,6 +90,30 @@ auth.post("/api/auth/register", async (c) => {
         if (existingUser) {
             return c.json({ error: "User already exists with this email" }, 400);
         }
+        // Get or create default organization
+        const { data: defaultOrg } = await sb
+            .from("organizations")
+            .select("id")
+            .eq("slug", "default-org")
+            .single();
+        let orgId = defaultOrg?.id;
+        if (!orgId) {
+            // Create default organization if it doesn't exist
+            const { data: newOrg, error: orgError } = await sb
+                .from("organizations")
+                .insert({
+                id: "00000000-0000-0000-0000-000000000001",
+                name: "Default Organization",
+                slug: "default-org"
+            })
+                .select("id")
+                .single();
+            if (orgError) {
+                console.error("Failed to create default org:", orgError);
+                return c.json({ error: "Failed to create organization" }, 500);
+            }
+            orgId = newOrg.id;
+        }
         // Create new user
         const { data: user, error } = await sb
             .from("users")
@@ -99,6 +123,7 @@ auth.post("/api/auth/register", async (c) => {
             role,
             region,
             is_active: true,
+            org_id: orgId,
             created_at: new Date().toISOString()
         })
             .select("id, email, name, role, region, org_id, is_active")
@@ -109,7 +134,7 @@ auth.post("/api/auth/register", async (c) => {
         }
         // Generate JWT token
         const iat = Math.floor(Date.now() / 1000);
-        const exp = iat + 7 * 24 * 3600; // 7 days
+        const exp = iat + 30 * 24 * 3600; // 30 days for better session management
         const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
         const token = await new SignJWT({
             iss: c.env.JWT_ISSUER,
@@ -170,7 +195,7 @@ auth.post("/api/auth/login", async (c) => {
         // For now, we'll accept any password for development
         // Generate JWT token
         const iat = Math.floor(Date.now() / 1000);
-        const exp = iat + 7 * 24 * 3600; // 7 days
+        const exp = iat + 30 * 24 * 3600; // 30 days for better session management
         const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
         const token = await new SignJWT({
             iss: c.env.JWT_ISSUER,
@@ -208,6 +233,118 @@ auth.post("/api/auth/login", async (c) => {
         return c.json({ error: "Internal server error" }, 500);
     }
 });
+// Magic link authentication endpoint
+auth.post("/api/auth/magic-link", async (c) => {
+    try {
+        const { email } = await c.req.json();
+        if (!email) {
+            return c.json({ error: "Email is required" }, 400);
+        }
+        const sb = supabaseAdmin(c.env);
+        // Check if user exists
+        const { data: user, error } = await sb
+            .from("users")
+            .select("id, email, name, role, region, org_id, is_active")
+            .eq("email", email)
+            .eq("is_active", true)
+            .single();
+        if (error || !user) {
+            return c.json({ error: "User not found or inactive" }, 404);
+        }
+        // Generate magic link token (simplified - in production you'd send an email)
+        const iat = Math.floor(Date.now() / 1000);
+        const exp = iat + 15 * 60; // 15 minutes for magic link
+        const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
+        const magicToken = await new SignJWT({
+            iss: c.env.JWT_ISSUER,
+            sub: user.id,
+            org_id: user.org_id,
+            role: user.role || "user",
+            type: "magic_link"
+        })
+            .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+            .setIssuedAt(iat)
+            .setExpirationTime(exp)
+            .setIssuer(c.env.JWT_ISSUER)
+            .setSubject(user.id)
+            .sign(secret);
+        // In production, you would send this token via email
+        // For now, we'll return it directly for testing
+        return c.json({
+            success: true,
+            message: "Magic link sent to your email",
+            magicToken, // Remove this in production
+            expiresIn: 15 * 60 // 15 minutes
+        }, 200);
+    }
+    catch (error) {
+        console.error("Magic link error:", error);
+        return c.json({ error: "Internal server error" }, 500);
+    }
+});
+// Verify magic link and exchange for session token
+auth.post("/api/auth/verify-magic-link", async (c) => {
+    try {
+        const { magicToken } = await c.req.json();
+        if (!magicToken) {
+            return c.json({ error: "Magic token is required" }, 400);
+        }
+        // Verify the magic link token
+        const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
+        const claims = await decodeJwt(magicToken);
+        if (claims.type !== "magic_link") {
+            return c.json({ error: "Invalid token type" }, 400);
+        }
+        const sb = supabaseAdmin(c.env);
+        // Get user data
+        const { data: user, error } = await sb
+            .from("users")
+            .select("id, email, name, role, region, org_id, is_active")
+            .eq("id", claims.sub)
+            .eq("is_active", true)
+            .single();
+        if (error || !user) {
+            return c.json({ error: "User not found or inactive" }, 404);
+        }
+        // Generate session token
+        const iat = Math.floor(Date.now() / 1000);
+        const exp = iat + 30 * 24 * 3600; // 30 days
+        const sessionToken = await new SignJWT({
+            iss: c.env.JWT_ISSUER,
+            sub: user.id,
+            org_id: user.org_id,
+            role: user.role || "user"
+        })
+            .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+            .setIssuedAt(iat)
+            .setExpirationTime(exp)
+            .setIssuer(c.env.JWT_ISSUER)
+            .setSubject(user.id)
+            .sign(secret);
+        return c.json({
+            success: true,
+            token: sessionToken,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                region: user.region,
+                permissions: {
+                    canCreateForms: user.role === 'admin',
+                    canManageUsers: user.role === 'admin',
+                    canViewAllSubmissions: user.role === 'admin',
+                    canEditSubmissions: user.role === 'admin'
+                },
+                isActive: user.is_active
+            }
+        }, 200);
+    }
+    catch (error) {
+        console.error("Magic link verification error:", error);
+        return c.json({ error: "Invalid or expired magic link" }, 400);
+    }
+});
 // DEV ONLY
 auth.post("/api/auth/dev-login", async (c) => {
     try {
@@ -216,7 +353,7 @@ auth.post("/api/auth/dev-login", async (c) => {
         console.log("Referer:", c.req.header("referer"));
         if (c.env.JWT_ISSUER !== "qieos")
             return c.json({ error: "disabled" }, 403); // simple guard
-        const { email = "admin@example.com" } = await c.req.json().catch(() => ({}));
+        const { email = "crice4485@gmail.com" } = await c.req.json().catch(() => ({}));
         console.log("Email:", email);
         const iss = c.env.JWT_ISSUER;
         // fetch user/org

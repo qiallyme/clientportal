@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import './Auth.css';
 
-const Login: React.FC = () => {
+const SupabaseLogin: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { signIn } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
+      await signIn(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err);
@@ -100,4 +100,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default SupabaseLogin;

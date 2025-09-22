@@ -1,12 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SupabaseAuthProvider, useSupabaseAuth } from './contexts/SupabaseAuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { FormsProvider } from './contexts/FormsContext';
 import { SubmissionsProvider } from './contexts/SubmissionsContext';
 import Layout from './components/Layout/Layout';
-import Login from './components/Auth/Login';
+import SupabaseLogin from './components/Auth/SupabaseLogin';
 import Register from './components/Auth/Register';
+import SupabaseMagicLink from './components/Auth/SupabaseMagicLink';
+import AuthCallback from './components/Auth/AuthCallback';
 import Dashboard from './components/Dashboard/Dashboard';
 import { FormsList, FormBuilder, FormViewer, FormSubmission } from './components/Forms';
 import { SubmissionsList, SubmissionViewer, SubmissionEditor } from './components/Submissions';
@@ -14,7 +16,7 @@ import './App.css';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSupabaseAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -25,7 +27,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Public Route Component (redirect to dashboard if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSupabaseAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -36,7 +38,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // Admin Only Route Component
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useSupabaseAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -46,7 +48,9 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.role !== 'admin') {
+  // Check if user has admin role in user metadata
+  const userRole = user?.user_metadata?.role || 'user';
+  if (userRole !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -64,7 +68,7 @@ const AppRoutes: React.FC = () => {
         path="/login"
         element={
           <PublicRoute>
-            <Login />
+            <SupabaseLogin />
           </PublicRoute>
         }
       />
@@ -75,6 +79,18 @@ const AppRoutes: React.FC = () => {
             <Register />
           </PublicRoute>
         }
+      />
+      <Route
+        path="/magic-link"
+        element={
+          <PublicRoute>
+            <SupabaseMagicLink />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/callback"
+        element={<AuthCallback />}
       />
 
       {/* Protected Routes */}
@@ -240,7 +256,7 @@ const AppRoutes: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <SocketProvider>
         <FormsProvider>
           <SubmissionsProvider>
@@ -252,7 +268,7 @@ function App() {
           </SubmissionsProvider>
         </FormsProvider>
       </SocketProvider>
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 }
 

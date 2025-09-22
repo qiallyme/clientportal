@@ -69,8 +69,15 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   
   // Temporary dev login for testing
-  devLogin: (email: string = 'admin@example.com'): Promise<AxiosResponse<AuthResponse>> =>
+  devLogin: (email: string = 'crice4485@gmail.com'): Promise<AxiosResponse<AuthResponse>> =>
     api.post('/auth/dev-login', { email }),
+  
+  // Magic link authentication
+  requestMagicLink: (email: string): Promise<AxiosResponse<{ success: boolean; message: string; magicToken?: string; expiresIn: number }>> =>
+    api.post('/auth/magic-link', { email }),
+  
+  verifyMagicLink: (magicToken: string): Promise<AxiosResponse<AuthResponse>> =>
+    api.post('/auth/verify-magic-link', { magicToken }),
   
   register: (userData: {
     name: string;
