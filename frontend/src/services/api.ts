@@ -25,15 +25,40 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle auth errors
+// Response interceptor to handle auth errors and token refresh
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+  (response) => {
+    // If response includes a new token, update it
+    if (response.data?.token) {
+      localStorage.setItem('token', response.data.token);
     }
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh the token
+        const refreshResponse = await api.post('/auth/refresh');
+        const { token } = refreshResponse.data;
+        
+        // Update the token and retry the original request
+        localStorage.setItem('token', token);
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -54,6 +79,9 @@ export const authAPI = {
   
   getMe: (): Promise<AxiosResponse<ApiResponse<User>>> =>
     api.get('/auth/me'),
+  
+  refreshToken: (): Promise<AxiosResponse<AuthResponse>> =>
+    api.post('/auth/refresh'),
   
   updateProfile: (userData: { name?: string; email?: string }): Promise<AxiosResponse<ApiResponse<User>>> =>
     api.put('/auth/profile', userData),

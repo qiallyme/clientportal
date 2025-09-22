@@ -1,5 +1,5 @@
 name = "client-portal"
-main = "worker.js"
+main = "worker-v2.js" # Updated to v2 with proper API surface
 compatibility_date = "2024-09-23"
 
 [env.production]

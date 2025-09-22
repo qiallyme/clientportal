@@ -1,0 +1,19 @@
+name: Worker Deploy
+on:
+  push:
+    paths:
+      - "workers/api/**"
+    branches: [ "main" ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i -g wrangler pnpm
+      - run: pnpm install
+      - working-directory: workers/api
+        run: wrangler deploy --dry-run

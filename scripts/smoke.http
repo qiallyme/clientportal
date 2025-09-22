@@ -1,0 +1,20 @@
+### health
+GET https://client-portal.qilife.workers.dev/health
+
+### me
+GET https://client-portal.qilife.workers.dev/api/auth/me
+Authorization: Bearer {{JWT}}
+
+### list forms
+GET https://client-portal.qilife.workers.dev/api/forms
+Authorization: Bearer {{JWT}}
+
+### create form
+POST https://client-portal.qilife.workers.dev/api/forms
+Authorization: Bearer {{JWT}}
+Content-Type: application/json
+
+{
+  "title": "Contact",
+  "schema": { "fields": [ { "id":"name","type":"text","label":"Name" } ] }
+}

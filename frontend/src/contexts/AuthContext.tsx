@@ -19,6 +19,7 @@ interface AuthContextType extends AuthState {
     region?: string;
   }) => Promise<void>;
   logout: () => void;
+  refreshToken: () => Promise<void>;
   updateProfile: (userData: { name?: string; email?: string }) => Promise<void>;
   changePassword: (passwords: { currentPassword: string; newPassword: string }) => Promise<void>;
 }
@@ -95,26 +96,44 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check for existing token on app load
+  // Check for existing token on app load and validate it
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    const validateAndRefreshToken = async () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
 
-    if (token && user) {
-      try {
-        const userData = JSON.parse(user);
-        dispatch({
-          type: 'AUTH_SUCCESS',
-          payload: { user: userData, token },
-        });
-      } catch (error) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      if (token && user) {
+        try {
+          const userData = JSON.parse(user);
+          
+          // Try to validate the token by calling /api/auth/me
+          const response = await authAPI.getMe();
+          
+          // If the response includes a new token, update it
+          if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            dispatch({
+              type: 'AUTH_SUCCESS',
+              payload: { user: response.data.user, token: response.data.token },
+            });
+          } else {
+            dispatch({
+              type: 'AUTH_SUCCESS',
+              payload: { user: response.data.user, token },
+            });
+          }
+        } catch (error) {
+          // Token is invalid, clear storage
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          dispatch({ type: 'AUTH_FAIL' });
+        }
+      } else {
         dispatch({ type: 'AUTH_FAIL' });
       }
-    } else {
-      dispatch({ type: 'AUTH_FAIL' });
-    }
+    };
+
+    validateAndRefreshToken();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -167,6 +186,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const refreshToken = async () => {
+    try {
+      const response = await authAPI.refreshToken();
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user, token },
+      });
+    } catch (error) {
+      // If refresh fails, logout the user
+      logout();
+      throw error;
+    }
+  };
+
   const updateProfile = async (userData: { name?: string; email?: string }) => {
     try {
       const response = await authAPI.updateProfile(userData);
@@ -192,6 +230,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    refreshToken,
     updateProfile,
     changePassword,
   };
