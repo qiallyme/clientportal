@@ -14,8 +14,9 @@ export const SubmissionCreate = z.object({
 export type SubmissionCreateT = z.infer<typeof SubmissionCreate>;
 
 export type Claims = {
-  iss: string;
+  iss?: string;
   sub: string;
+  email?: string;
   org_id: string;
   role?: string;
   company_ids?: string[];

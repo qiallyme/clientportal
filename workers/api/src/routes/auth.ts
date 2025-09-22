@@ -38,20 +38,39 @@ auth.get("/api/auth/me", requireAuth, async (c) => {
   }, 200);
 });
 
-auth.post("/api/auth/refresh", requireAuth, async (c) => {
-  const claims = c.get("claims");
-  const iat = Math.floor(Date.now()/1000);
-  const exp = iat + 30*24*3600; // 30 days
-  // NOTE: use a real keypair/secret in env; this is sketch-only
-  const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
-  const token = await new SignJWT({...claims, iat, exp})
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-    .setIssuedAt(iat)
-    .setExpirationTime(exp)
-    .setIssuer(c.env.JWT_ISSUER)
-    .setSubject(claims.sub)
-    .sign(secret);
-  return c.json({ success: true, token, exp }, 200);
+// Refresh endpoint - Uses Supabase session refresh
+auth.post("/api/auth/refresh", async (c) => {
+  try {
+    const { refresh_token } = await c.req.json();
+    
+    if (!refresh_token) {
+      return c.json({ error: "Refresh token is required" }, 400);
+    }
+    
+    const sb = supabaseAdmin(c.env);
+    
+    // Use Supabase to refresh the session
+    const { data, error } = await sb.auth.refreshSession({
+      refresh_token
+    });
+    
+    if (error) {
+      console.error("Session refresh error:", error);
+      return c.json({ error: "Failed to refresh session" }, 401);
+    }
+    
+    if (!data.session) {
+      return c.json({ error: "No session returned" }, 401);
+    }
+    
+    return c.json({
+      success: true,
+      session: data.session
+    }, 200);
+  } catch (error) {
+    console.error("Refresh error:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
 });
 
 // DEV ONLY - Test Supabase connection
@@ -78,7 +97,7 @@ auth.get("/api/auth/check-user", async (c) => {
   }
 });
 
-// Register endpoint
+// Register endpoint - Uses Supabase Auth
 auth.post("/api/auth/register", async (c) => {
   try {
     const { name, email, password, role = "user", region = "global" } = await c.req.json();
@@ -89,15 +108,26 @@ auth.post("/api/auth/register", async (c) => {
     
     const sb = supabaseAdmin(c.env);
     
-    // Check if user already exists
-    const { data: existingUser } = await sb
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .single();
+    // Use Supabase Auth to create user
+    const { data: authData, error: authError } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          role,
+          region
+        }
+      }
+    });
     
-    if (existingUser) {
-      return c.json({ error: "User already exists with this email" }, 400);
+    if (authError) {
+      console.error("Supabase Auth registration error:", authError);
+      return c.json({ error: authError.message }, 400);
+    }
+    
+    if (!authData.user) {
+      return c.json({ error: "Failed to create user" }, 500);
     }
     
     // Get or create default organization
@@ -127,10 +157,11 @@ auth.post("/api/auth/register", async (c) => {
       orgId = newOrg.id;
     }
 
-    // Create new user
-    const { data: user, error } = await sb
+    // Create user profile in our users table
+    const { data: user, error: userError } = await sb
       .from("users")
       .insert({
+        id: authData.user.id, // Use Supabase Auth user ID
         name,
         email,
         role,
@@ -142,31 +173,13 @@ auth.post("/api/auth/register", async (c) => {
       .select("id, email, name, role, region, org_id, is_active")
       .single();
     
-    if (error || !user) {
-      console.error("Registration error:", error);
-      return c.json({ error: "Failed to create user" }, 500);
+    if (userError) {
+      console.error("User profile creation error:", userError);
+      return c.json({ error: "Failed to create user profile" }, 500);
     }
-    
-    // Generate JWT token
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 30 * 24 * 3600; // 30 days for better session management
-    const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
-    const token = await new SignJWT({
-      iss: c.env.JWT_ISSUER,
-      sub: user.id,
-      org_id: user.org_id,
-      role: user.role || "user"
-    })
-      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-      .setIssuedAt(iat)
-      .setExpirationTime(exp)
-      .setIssuer(c.env.JWT_ISSUER)
-      .setSubject(user.id)
-      .sign(secret);
     
     return c.json({
       success: true,
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -180,7 +193,8 @@ auth.post("/api/auth/register", async (c) => {
           canEditSubmissions: user.role === 'admin'
         },
         isActive: user.is_active
-      }
+      },
+      session: authData.session // Return Supabase session
     }, 201);
   } catch (error) {
     console.error("Registration error:", error);
@@ -188,7 +202,7 @@ auth.post("/api/auth/register", async (c) => {
   }
 });
 
-// Login endpoint
+// Login endpoint - Uses Supabase Auth
 auth.post("/api/auth/login", async (c) => {
   try {
     const { email, password } = await c.req.json();
@@ -199,42 +213,36 @@ auth.post("/api/auth/login", async (c) => {
     
     const sb = supabaseAdmin(c.env);
     
-    // For now, we'll use a simple check against the users table
-    // In production, you'd want proper password hashing
-    const { data: user, error } = await sb
-      .from("users")
-      .select("id, email, name, role, region, org_id, is_active")
-      .eq("email", email)
-      .eq("is_active", true)
-      .single();
+    // Use Supabase Auth to authenticate user
+    const { data: authData, error: authError } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
     
-    if (error || !user) {
+    if (authError) {
+      console.error("Supabase Auth login error:", authError);
       return c.json({ error: "Invalid credentials" }, 401);
     }
     
-    // TODO: Add proper password verification here
-    // For now, we'll accept any password for development
+    if (!authData.user || !authData.session) {
+      return c.json({ error: "Authentication failed" }, 401);
+    }
     
-    // Generate JWT token
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 30 * 24 * 3600; // 30 days for better session management
-    const secret = new TextEncoder().encode(c.env.JWT_HS256_SECRET);
-    const token = await new SignJWT({
-      iss: c.env.JWT_ISSUER,
-      sub: user.id,
-      org_id: user.org_id,
-      role: user.role || "user"
-    })
-      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-      .setIssuedAt(iat)
-      .setExpirationTime(exp)
-      .setIssuer(c.env.JWT_ISSUER)
-      .setSubject(user.id)
-      .sign(secret);
+    // Get user profile from our users table
+    const { data: user, error: userError } = await sb
+      .from("users")
+      .select("id, email, name, role, region, org_id, is_active")
+      .eq("id", authData.user.id)
+      .eq("is_active", true)
+      .single();
+    
+    if (userError || !user) {
+      console.error("User profile fetch error:", userError);
+      return c.json({ error: "User profile not found" }, 404);
+    }
     
     return c.json({
       success: true,
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -248,10 +256,40 @@ auth.post("/api/auth/login", async (c) => {
           canEditSubmissions: user.role === 'admin'
         },
         isActive: user.is_active
-      }
+      },
+      session: authData.session // Return Supabase session
     }, 200);
   } catch (error) {
     console.error("Login error:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Logout endpoint - Uses Supabase Auth
+auth.post("/api/auth/logout", async (c) => {
+  try {
+    const { refresh_token } = await c.req.json();
+    
+    if (!refresh_token) {
+      return c.json({ error: "Refresh token is required" }, 400);
+    }
+    
+    const sb = supabaseAdmin(c.env);
+    
+    // Use Supabase to sign out
+    const { error } = await sb.auth.signOut();
+    
+    if (error) {
+      console.error("Logout error:", error);
+      return c.json({ error: "Failed to logout" }, 500);
+    }
+    
+    return c.json({
+      success: true,
+      message: "Logged out successfully"
+    }, 200);
+  } catch (error) {
+    console.error("Logout error:", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 });
