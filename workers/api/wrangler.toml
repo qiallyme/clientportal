@@ -1,3 +1,6 @@
+# 🚫 LOCKED — Do not edit without RFC approval (QiEOS God Doc §12.2)
+# This file contains working Cloudflare Workers configuration
+# Last verified working: 2025-09-22 - Deployment is functional
 name = "clientportal-api"
 main = "src/index.ts"
 compatibility_date = "2025-09-10"

@@ -1,3 +1,6 @@
+// 🚫 LOCKED — Do not edit without RFC approval (QiEOS God Doc §12.2)
+// This file contains working API server configuration with CORS
+// Last verified working: 2025-09-22 - API server is functional
 import { Hono } from "hono";
 import { cors, rateLimit, requestId, timing } from "./middleware/common";
 import { health } from "./routes/health";
@@ -20,6 +23,7 @@ export type Variables = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+// 🔒 LOCK-START: CORS configuration — Working cross-origin setup
 const allow = [
   "http://localhost:3000",
   "http://localhost:5173", 
@@ -27,6 +31,7 @@ const allow = [
   "https://portal.qially.com",
   "https://api.qially.com"
 ];
+// 🔓 LOCK-END
 
 app.use("*", requestId);
 app.use("*", timing);

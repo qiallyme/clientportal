@@ -1,3 +1,6 @@
+// 🚫 LOCKED — Do not edit without RFC approval (QiEOS God Doc §12.2)
+// This file contains working API service configuration
+// Last verified working: 2025-09-22 - API calls are functional
 import axios, { AxiosResponse } from 'axios';
 import { AuthResponse, ApiResponse, PaginatedResponse, User, Form, Submission } from '../types';
 

@@ -1,3 +1,6 @@
+// 🚫 LOCKED — Do not edit without RFC approval (QiEOS God Doc §12.2)
+// This file contains working Supabase authentication configuration
+// Last verified working: 2025-09-22 - Authentication is functional
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration with validation
@@ -21,6 +24,7 @@ console.log('Supabase Config:', {
   finalKey: `${supabaseAnonKey.substring(0, 20)}...`
 });
 
+// 🔒 LOCK-START: Supabase client configuration — Working authentication setup
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -30,6 +34,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce'
   }
 });
+// 🔓 LOCK-END
 
 // Auth helper functions
 export const auth = {

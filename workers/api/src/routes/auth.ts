@@ -1,3 +1,6 @@
+// 🚫 LOCKED — Do not edit without RFC approval (QiEOS God Doc §12.2)
+// This file contains working Supabase Auth integration
+// Last verified working: 2025-09-22 - Authentication is functional
 import { Hono } from "hono";
 import { requireAuth } from "../middleware/auth";
 import { SignJWT, decodeJwt } from "jose";
