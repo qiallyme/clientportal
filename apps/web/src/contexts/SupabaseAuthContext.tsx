@@ -192,7 +192,7 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
   const signInWithMagicLink = async (email: string) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const { data, error } = await auth.signInWithMagicLink(email);
+      const { error } = await auth.signInWithMagicLink(email);
       
       if (error) {
         throw error;
