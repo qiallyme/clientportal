@@ -1,315 +1,399 @@
-# Client Portal - Cross-Region MERN Stack Application
+# Client Portal - Modern Full-Stack Application
 
-A modern, real-time client portal built with the MERN stack, designed to work seamlessly in both China and the US without requiring a VPN. Features include form submissions, real-time updates, user management, and admin dashboards.
+A modern, real-time client portal built with React, Supabase, and Cloudflare Workers. Features include form submissions, real-time updates, user management, and admin dashboards with enterprise-grade security and performance.
 
 ## 🚀 Features
 
-- **Cross-Region Access**: Optimized for both China and US regions
-- **Real-Time Updates**: Live data synchronization using Socket.io
-- **Form Management**: Create and manage dynamic forms
-- **User Management**: Role-based access control with permissions
+- **Modern Architecture**: React frontend with Cloudflare Workers backend
+- **Real-Time Updates**: Live data synchronization using WebSockets
+- **Form Management**: Create and manage dynamic forms with custom schemas
+- **User Management**: Role-based access control with Supabase Auth
 - **Admin Dashboard**: Comprehensive analytics and management tools
 - **Responsive Design**: Works on desktop and mobile devices
-- **Secure Authentication**: JWT-based authentication with role permissions
+- **Secure Authentication**: Supabase Auth with JWT tokens and RLS policies
+- **Multi-Tenant**: Organization-based data isolation with Row Level Security
+- **Global CDN**: Cloudflare's edge network for fast global access
 
 ## 🛠 Tech Stack
 
-### Backend
+### Frontend (Cloudflare Pages)
 
-- **Node.js** with Express.js
-- **MongoDB** with Mongoose
-- **Socket.io** for real-time communication
-- **JWT** for authentication
-- **Helmet** for security
-- **Express Rate Limiting** for API protection
-
-### Frontend
-
-- **React** with TypeScript
+- **React 19** with TypeScript
 - **React Router** for navigation
+- **Supabase Client** for authentication and real-time features
 - **Axios** for API calls
 - **Socket.io Client** for real-time updates
 - **CSS3** with modern styling
 
+### Backend (Cloudflare Workers)
+
+- **Hono** framework for high-performance API
+- **Supabase** for database and authentication
+- **JWT** token validation with jose
+- **Zod** for request validation
+- **CORS** and rate limiting middleware
+
+### Database & Auth
+
+- **Supabase PostgreSQL** with Row Level Security
+- **Supabase Auth** for user management
+- **Real-time subscriptions** for live updates
+
+### Infrastructure
+
+- **Cloudflare Pages** for frontend hosting
+- **Cloudflare Workers** for API hosting
+- **Cloudflare CDN** for global distribution
+- **Custom domains**: `portal.qially.com` and `api.qially.com`
+
 ## 📋 Prerequisites
 
-- Node.js (v14 or higher)
-- MongoDB (local or cloud instance)
+- Node.js (v18 or higher)
 - npm or yarn
+- Supabase account
+- Cloudflare account
 
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd client-portal
+git clone https://github.com/qiallyme/clientportal.git
+cd clientportal
 ```
 
 ### 2. Install Dependencies
 
-#### Backend
-
 ```bash
-npm install
-```
-
-#### Frontend
-
-```bash
-cd client
-npm install
+npm run install:all
 ```
 
 ### 3. Environment Configuration
 
-#### Backend (.env)
+#### Backend (Cloudflare Workers)
+
+Set up your Cloudflare Workers secrets:
+
+```bash
+cd workers/api
+wrangler secret put SUPABASE_URL
+wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+```
+
+#### Frontend (React App)
+
+Create environment file:
+
+```bash
+cd apps/web
+cp .env.example .env.local
+```
+
+Edit `apps/web/.env.local`:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# API Configuration (production)
+VITE_API_URL=https://api.qially.com
+
+# API Configuration (development)
+# VITE_API_URL=http://localhost:8787
+```
+
+#### Root Environment
+
+Create `env.example` copy:
 
 ```bash
 cp env.example .env
 ```
 
-Edit `.env` with your configuration:
+Edit `.env`:
 
 ```env
-# Database
-MONGODB_URI=mongodb://localhost:27017/client-portal
-
-# JWT
-JWT_SECRET=your-super-secret-jwt-key-here
-JWT_EXPIRE=7d
-
-# Server
-PORT=5000
-NODE_ENV=development
-REGION=us
-
 # Client URL (production)
 CLIENT_URL=https://portal.qially.com
-# Client URL (development)
-# CLIENT_URL=http://localhost:3000
-```
 
-#### Frontend (client/.env)
-
-```bash
-cd client
-cp env.example .env
-```
-
-Edit `client/.env`:
-
-```env
-# Production URLs
+# API URLs (production)
 REACT_APP_API_URL=https://api.qially.com
 REACT_APP_SOCKET_URL=https://api.qially.com
-
-# Development URLs (uncomment for local development)
-# REACT_APP_API_URL=http://localhost:5000/api
-# REACT_APP_SOCKET_URL=http://localhost:5000
 ```
 
-### 4. Start the Application
+### 4. Database Setup
 
-#### Development Mode
+#### Option 1: Use Supabase CLI (Recommended)
 
 ```bash
-# Start backend (from root directory)
+# Install Supabase CLI
+npm install -g supabase
+
+# Link to your project
+supabase link --project-ref your-project-ref
+
+# Run migrations
+supabase db push
+
+# Apply seed data
+supabase db seed
+```
+
+#### Option 2: Manual Setup
+
+Run the SQL files in your Supabase SQL Editor:
+
+1. `infra/supabase/migrations/001_initial_schema.sql`
+2. `infra/supabase/seeds/001_initial_data.sql`
+
+### 5. Development
+
+#### Start Frontend
+
+```bash
 npm run dev
-
-# Start frontend (from client directory)
-cd client
-npm start
+# or
+cd apps/web && npm start
 ```
 
-#### Production Mode
+#### Start Backend (Local Development)
 
 ```bash
-# Build frontend
-npm run build
-
-# Start production server
-npm start
+cd workers/api
+npm run dev
 ```
 
-## 🌍 Cross-Region Deployment
+### 6. Production Deployment
 
-### Recommended Infrastructure
+#### Deploy Backend (Cloudflare Workers)
 
-#### For US Region:
+```bash
+cd workers/api
+npm run deploy
+```
 
-- **Hosting**: AWS, Google Cloud, or DigitalOcean
-- **Database**: MongoDB Atlas (US region)
-- **CDN**: CloudFlare or AWS CloudFront
+#### Deploy Frontend (Cloudflare Pages)
 
-#### For China Region:
+```bash
+cd apps/web
+npm run build
+# Deploy build folder to Cloudflare Pages
+```
 
-- **Hosting**: Alibaba Cloud, Tencent Cloud, or AWS China
-- **Database**: MongoDB Atlas (Asia Pacific region)
-- **CDN**: Alibaba Cloud CDN or Tencent Cloud CDN
+## 🌐 Production URLs
 
-### Deployment Steps
+- **Frontend**: https://portal.qially.com
+- **API**: https://api.qially.com
+- **Health Check**: https://api.qially.com/health
 
-1. **Set up MongoDB Atlas**:
+## 📁 Project Structure
 
-   - Create clusters in both US and China regions
-   - Configure replica sets for high availability
-   - Set up proper security groups
+```
+clientportal/
+├── apps/
+│   └── web/                    # React frontend
+│       ├── src/
+│       │   ├── components/     # React components
+│       │   ├── contexts/       # React contexts
+│       │   ├── lib/           # Supabase client
+│       │   ├── services/      # API services
+│       │   └── types/         # TypeScript types
+│       ├── public/            # Static assets
+│       └── package.json
+├── workers/
+│   └── api/                   # Cloudflare Workers API
+│       ├── src/
+│       │   ├── routes/        # API routes
+│       │   ├── middleware/    # Middleware functions
+│       │   └── lib/          # Utility libraries
+│       ├── wrangler.toml     # Cloudflare Workers config
+│       └── package.json
+├── infra/
+│   └── supabase/             # Database migrations
+│       ├── migrations/       # SQL migration files
+│       └── seeds/           # Seed data files
+├── docs/                    # Documentation
+└── package.json            # Root package.json
+```
 
-2. **Deploy Backend**:
+## 🔧 Cloudflare Configuration
 
-   ```bash
-   # Build and deploy to your hosting provider
-   npm run build
-   ```
+### Cloudflare Pages Settings
 
-3. **Deploy Frontend**:
+**Build Settings:**
 
-   ```bash
-   cd client
-   npm run build
-   # Deploy build folder to CDN/hosting
-   ```
+- **Build command**: `npm ci --prefix apps/web && npm run build --prefix apps/web`
+- **Build output directory**: `apps/web/build`
+- **Root directory**: `/` (leave empty)
 
-4. **Environment Variables**:
-   - Set production environment variables
-   - Configure CORS for cross-region access
-   - Set up SSL certificates
+**Environment Variables:**
 
-### Performance Optimization
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_API_URL=https://api.qially.com
+```
 
-- **Database Indexing**: Ensure proper indexes on frequently queried fields
-- **CDN Configuration**: Use regional CDNs for static assets
-- **Caching**: Implement Redis for session and data caching
-- **Load Balancing**: Use load balancers for high availability
+**Custom Domain:**
 
-## 📚 API Documentation
+- Set up `portal.qially.com` to point to your Cloudflare Pages
 
-### Authentication Endpoints
+### Cloudflare Workers Settings
 
-- `POST /api/auth/login` - User login
+**Worker Configuration:**
+
+- **Name**: `clientportal-api`
+- **Custom Domain**: `api.qially.com`
+
+**Environment Variables:**
+
+```env
+JWT_ISSUER=clientportal
+```
+
+**Secrets:**
+
+```bash
+wrangler secret put SUPABASE_URL
+wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+```
+
+## 🔐 Authentication Flow
+
+1. **User Registration/Login**: Handled by Supabase Auth
+2. **JWT Token**: Generated by Supabase with custom claims
+3. **API Requests**: Include JWT token in Authorization header
+4. **Row Level Security**: Database policies enforce tenant isolation
+5. **Real-time Updates**: WebSocket connections with authenticated users
+
+## 🗄️ Database Schema
+
+### Core Tables
+
+- **organizations**: Multi-tenant organization data
+- **users**: User profiles linked to organizations
+- **forms**: Dynamic form definitions
+- **submissions**: Form submission data
+
+### Security Features
+
+- **Row Level Security (RLS)**: Tenant-based data isolation
+- **JWT Claims**: Organization and user context in tokens
+- **Helper Functions**: `jwt_org_id()` and `jwt_uid()` for RLS policies
+
+## 🚀 API Endpoints
+
+### Authentication
+
 - `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `POST /api/auth/refresh` - Refresh session
 - `GET /api/auth/me` - Get current user
-- `PUT /api/auth/profile` - Update profile
-- `PUT /api/auth/change-password` - Change password
 
-### Forms Endpoints
+### Forms
 
-- `GET /api/forms` - Get all forms
-- `POST /api/forms` - Create new form
-- `GET /api/forms/:id` - Get single form
+- `GET /api/forms` - List forms
+- `POST /api/forms` - Create form
+- `GET /api/forms/:id` - Get form details
 - `PUT /api/forms/:id` - Update form
 - `DELETE /api/forms/:id` - Delete form
 
-### Submissions Endpoints
+### Submissions
 
-- `GET /api/submissions` - Get all submissions
-- `POST /api/submissions` - Create new submission
-- `GET /api/submissions/:id` - Get single submission
+- `GET /api/submissions` - List submissions
+- `POST /api/submissions` - Create submission
+- `GET /api/submissions/:id` - Get submission details
 - `PUT /api/submissions/:id` - Update submission
-- `POST /api/submissions/:id/notes` - Add note to submission
 
-### Users Endpoints (Admin only)
+### Health
 
-- `GET /api/users` - Get all users
-- `POST /api/users` - Create new user
-- `PUT /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
+- `GET /health` - Health check endpoint
 
-## 🔐 Security Features
+## 🔧 Development Commands
 
-- **JWT Authentication**: Secure token-based authentication
-- **Role-Based Access Control**: Admin, User, and Viewer roles
-- **Permission System**: Granular permissions for different actions
-- **Rate Limiting**: API rate limiting to prevent abuse
-- **Input Validation**: Server-side validation for all inputs
-- **CORS Configuration**: Proper cross-origin resource sharing
-- **Helmet Security**: Security headers and protection
+```bash
+# Install all dependencies
+npm run install:all
 
-## 🎨 User Interface
+# Start frontend development server
+npm run dev
 
-- **Modern Design**: Clean, professional interface
-- **Responsive Layout**: Works on all device sizes
-- **Real-Time Updates**: Live data synchronization
-- **Intuitive Navigation**: Easy-to-use navigation system
-- **Accessibility**: WCAG compliant design
+# Build frontend for production
+npm run build
 
-## 📊 Admin Features
+# Build and deploy backend
+npm run build:worker
+npm run deploy:worker
 
-- **Dashboard Analytics**: Overview of system statistics
-- **User Management**: Create, edit, and manage users
-- **Form Management**: Create and configure forms
-- **Submission Tracking**: Monitor and manage submissions
-- **Real-Time Monitoring**: Live updates and notifications
+# Type checking
+npm run check
 
-## 🔧 Development
-
-### Project Structure
-
-```
-client-portal/
-├── models/           # MongoDB models
-├── routes/           # API routes
-├── middleware/       # Custom middleware
-├── client/           # React frontend
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── contexts/     # React contexts
-│   │   ├── services/     # API services
-│   │   └── types/        # TypeScript types
-│   └── public/       # Static assets
-├── server.js         # Main server file
-└── package.json      # Dependencies
+# Run tests
+npm test
 ```
 
-### Available Scripts
+## 📝 Environment Variables
 
-#### Backend
+### Frontend (Vite)
 
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-- `npm run client` - Start React development server
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_API_URL=https://api.qially.com
+```
 
-#### Frontend
+### Backend (Cloudflare Workers)
 
-- `npm start` - Start React development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
+```env
+JWT_ISSUER=clientportal
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **CORS Errors**: Ensure `portal.qially.com` is in the CORS allowlist
+2. **Authentication Issues**: Check Supabase configuration and JWT_ISSUER
+3. **Database Connection**: Verify Supabase URL and service role key
+4. **Build Failures**: Check Node.js version and dependency installation
+
+### Debug Commands
+
+```bash
+# Check API health
+curl https://api.qially.com/health
+
+# Test CORS
+curl -H "Origin: https://portal.qially.com" https://api.qially.com/health
+
+# Check Cloudflare Workers logs
+wrangler tail
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Test thoroughly
 5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
 For support and questions:
 
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
+- Create an issue in the GitHub repository
+- Check the documentation in the `docs/` folder
+- Review the troubleshooting section above
 
-## 🔄 Updates
+---
 
-The application includes real-time updates for:
-
-- New form submissions
-- Submission status changes
-- User activity
-- System notifications
-
-## 🌟 Key Benefits
-
-- **No VPN Required**: Works in both China and US
-- **Fast Performance**: Optimized for cross-region access
-- **Real-Time**: Live updates like Google Sheets
-- **Secure**: Enterprise-grade security
-- **Scalable**: Built to handle growth
-- **User-Friendly**: Intuitive interface for all users
+**Built with ❤️ using React, Supabase, and Cloudflare**
