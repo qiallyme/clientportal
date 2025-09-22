@@ -15,8 +15,8 @@ name = "client-portal-prod"
 # REGION = "us"
 # CLIENT_URL = "https://your-domain.com"
 
-[build]
-command = "cd frontend && npm install && npm run build"
+# [build]
+# command = "cd frontend && npm install && npm run build"
 
 # For Pages deployment
 pages_build_output_dir = "frontend/build"

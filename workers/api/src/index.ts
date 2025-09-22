@@ -4,16 +4,27 @@ import { health } from "./routes/health";
 import { auth } from "./routes/auth";
 import { forms } from "./routes/forms";
 import { submissions } from "./routes/submissions";
+import type { Claims } from "./types";
 
 export type Bindings = {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   JWT_ISSUER: string;
+  JWT_HS256_SECRET: string;
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
+export type Variables = {
+  claims: Claims;
+  reqId: string;
+};
 
-const allow = ["http://localhost:5173", "https://6dd9face.clientportal-3pk.pages.dev"];
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+const allow = [
+  "http://localhost:3000",
+  "http://localhost:5173", 
+  "https://6fb48749.clientportal-3pk.pages.dev"
+];
 
 app.use("*", requestId);
 app.use("*", timing);

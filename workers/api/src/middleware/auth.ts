@@ -2,7 +2,7 @@ import { MiddlewareHandler } from "hono";
 import { decodeJwt } from "jose";
 import type { Claims } from "../types";
 
-export const requireAuth: MiddlewareHandler = async (c, next) => {
+export const requireAuth: MiddlewareHandler<{ Variables: { claims: Claims } }> = async (c, next) => {
   const auth = c.req.header("authorization") || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   if (!token) return c.json({ error: "missing token" }, 401);

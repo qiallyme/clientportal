@@ -3,8 +3,9 @@ import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth";
 import { supabaseAdmin } from "../lib/supabaseAdmin";
 import { SubmissionCreate } from "../types";
+import type { Bindings, Variables } from "../index";
 
-export const submissions = new Hono();
+export const submissions = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 submissions.get("/api/submissions", requireAuth, async (c) => {
   const { org_id } = c.get("claims");
@@ -17,10 +18,14 @@ submissions.get("/api/submissions", requireAuth, async (c) => {
 submissions.post(
   "/api/submissions",
   requireAuth,
-  zValidator("json", SubmissionCreate, (result, c) => !result.success && c.json({ error: result.error.flatten() }, 400)),
+  zValidator("json", SubmissionCreate, (result, c) => {
+    if (!result.success) {
+      return c.json({ error: result.error.issues }, 400);
+    }
+  }),
   async (c) => {
     const { org_id, sub } = c.get("claims");
-    const body = await c.req.json();
+    const body = c.req.valid("json");
     const sb = supabaseAdmin(c.env);
     const { error } = await sb
       .from("submissions")

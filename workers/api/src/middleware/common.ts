@@ -22,7 +22,7 @@ export const cors = (origins: string[]): MiddlewareHandler => {
       c.header("access-control-allow-headers", "authorization,content-type");
       c.header("access-control-allow-methods", "GET,POST,PATCH,OPTIONS");
     }
-    if (c.req.method === "OPTIONS") return c.text("", 204);
+    if (c.req.method === "OPTIONS") return new Response(null, { status: 204 });
     await next();
   };
 };

@@ -140,14 +140,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       const response = await authAPI.login(email, password);
-      const { token } = response.data;
+      const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-
-      // Get user info from /api/auth/me
-      const userResponse = await authAPI.getMe();
-      const user = userResponse.data.data!;
-
       localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({

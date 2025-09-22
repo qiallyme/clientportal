@@ -1,7 +1,7 @@
-name = "qieos-api"
+name = "client-portal"
 main = "src/index.ts"
 compatibility_date = "2025-09-10"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 JWT_ISSUER = "qieos"
