@@ -149,6 +149,44 @@
   text-transform: uppercase;
 }
 
+/* Status badge colors */
+.status-badge[data-status="pending"] {
+  background-color: #f59e0b;
+}
+
+.status-badge[data-status="in-progress"] {
+  background-color: #3b82f6;
+}
+
+.status-badge[data-status="completed"] {
+  background-color: #10b981;
+}
+
+.status-badge[data-status="rejected"] {
+  background-color: #ef4444;
+}
+
+.status-badge[data-status="on-hold"] {
+  background-color: #6b7280;
+}
+
+/* Priority badge colors */
+.priority-badge[data-priority="low"] {
+  background-color: #10b981;
+}
+
+.priority-badge[data-priority="medium"] {
+  background-color: #f59e0b;
+}
+
+.priority-badge[data-priority="high"] {
+  background-color: #ef4444;
+}
+
+.priority-badge[data-priority="urgent"] {
+  background-color: #dc2626;
+}
+
 .form-status {
   display: flex;
   align-items: center;

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSubmissions } from '../../contexts/SubmissionsContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useForms } from '../../contexts/FormsContext';
 import './SubmissionViewer.css';
 
 const SubmissionViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentSubmission, loading, error, fetchSubmission, clearError, addNote } = useSubmissions();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const { fetchForm } = useForms();
   
   const [newNote, setNewNote] = useState('');

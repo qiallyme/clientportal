@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, auth } from '../lib/supabase';
+import { auth } from '../lib/supabase';
 
 interface AuthState {
   user: User | null;
@@ -221,15 +221,15 @@ export const SupabaseAuthProvider: React.FC<SupabaseAuthProviderProps> = ({ chil
 
   const refreshSession = async () => {
     try {
-      const { data, error } = await auth.getCurrentSession();
+      const { session, error } = await auth.getCurrentSession();
       if (error) {
         throw error;
       }
 
-      if (data.session?.user) {
+      if (session?.user) {
         dispatch({
           type: 'AUTH_SUCCESS',
-          payload: { user: data.session.user, session: data.session },
+          payload: { user: session.user, session },
         });
       } else {
         dispatch({ type: 'AUTH_FAIL' });

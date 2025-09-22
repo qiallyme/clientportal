@@ -1,13 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useForms } from '../../contexts/FormsContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { User } from '../../types';
+import { authAPI } from '../../services/api';
 import './FormViewer.css';
 
 const FormViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentForm, loading, error, fetchForm, clearError } = useForms();
-  const { user } = useAuth();
+  const { user: supabaseUser, isAuthenticated } = useSupabaseAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && supabaseUser) {
+        try {
+          const response = await authAPI.getMe();
+          if (response.data.success && response.data.data) {
+            setUserProfile(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
     if (id) {
@@ -75,7 +98,7 @@ const FormViewer: React.FC = () => {
         );
       case 'select':
         return (
-          <select disabled className="field-preview">
+          <select id={field.name} disabled className="field-preview">
             <option>{field.placeholder || `Select ${field.label.toLowerCase()}`}</option>
             {field.options?.map((option: string, index: number) => (
               <option key={index} value={option}>
@@ -106,6 +129,7 @@ const FormViewer: React.FC = () => {
         return (
           <input
             type="date"
+            id={field.name}
             disabled
             className="field-preview"
           />
@@ -114,6 +138,7 @@ const FormViewer: React.FC = () => {
         return (
           <input
             type="file"
+            id={field.name}
             disabled
             className="field-preview"
           />
@@ -150,7 +175,7 @@ const FormViewer: React.FC = () => {
               Submit Form
             </Link>
           )}
-          {user?.permissions.canCreateForms && (
+          {userProfile?.permissions.canCreateForms && (
             <>
               <Link to={`/forms/${currentForm._id}/edit`} className="btn btn-outline">
                 Edit Form
@@ -178,7 +203,7 @@ const FormViewer: React.FC = () => {
           <div className="form-preview">
             {currentForm.fields.map((field, index) => (
               <div key={index} className="form-field">
-                <label className="field-label">
+                <label htmlFor={field.name} className="field-label">
                   {field.label}
                   {field.required && <span className="required">*</span>}
                 </label>

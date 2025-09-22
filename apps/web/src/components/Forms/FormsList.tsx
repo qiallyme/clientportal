@@ -1,14 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForms } from '../../contexts/FormsContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { User } from '../../types';
+import { authAPI } from '../../services/api';
 import './FormsList.css';
 
 const FormsList: React.FC = () => {
   const { forms, loading, error, pagination, fetchForms, deleteForm } = useForms();
-  const { user } = useAuth();
+  const { user: supabaseUser, isAuthenticated } = useSupabaseAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && supabaseUser) {
+        try {
+          const response = await authAPI.getMe();
+          if (response.data.success && response.data.data) {
+            setUserProfile(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
     fetchForms({
@@ -50,7 +73,7 @@ const FormsList: React.FC = () => {
     <div className="forms-list">
       <div className="forms-header">
         <h1>Forms Management</h1>
-        {user?.permissions.canCreateForms && (
+        {userProfile?.permissions.canCreateForms && (
           <Link to="/forms/new" className="btn btn-primary">
             Create New Form
           </Link>
@@ -74,7 +97,9 @@ const FormsList: React.FC = () => {
           />
         </div>
         <div className="status-filter">
+          <label htmlFor="status-filter-select" className="sr-only">Filter by status</label>
           <select
+            id="status-filter-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className="filter-select"
@@ -90,7 +115,7 @@ const FormsList: React.FC = () => {
         {forms.length === 0 ? (
           <div className="no-forms">
             <p>No forms found.</p>
-            {user?.permissions.canCreateForms && (
+            {userProfile?.permissions.canCreateForms && (
               <Link to="/forms/new" className="btn btn-primary">
                 Create Your First Form
               </Link>
@@ -141,7 +166,7 @@ const FormsList: React.FC = () => {
                 <Link to={`/forms/${form._id}`} className="btn btn-secondary">
                   View
                 </Link>
-                {user?.permissions.canCreateForms && (
+                {userProfile?.permissions.canCreateForms && (
                   <Link to={`/forms/${form._id}/edit`} className="btn btn-outline">
                     Edit
                   </Link>
@@ -151,7 +176,7 @@ const FormsList: React.FC = () => {
                     Submissions
                   </Link>
                 )}
-                {user?.permissions.canCreateForms && (
+                {userProfile?.permissions.canCreateForms && (
                   <button
                     onClick={() => handleDelete(form._id, form.title)}
                     className="btn btn-danger"

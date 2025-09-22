@@ -11,11 +11,6 @@ const QiSuiteLogo: React.FC<QiSuiteLogoProps> = ({
   variant = 'full',
   className = '' 
 }) => {
-  const sizeClasses = {
-    small: 'h-8',
-    medium: 'h-12',
-    large: 'h-16'
-  };
 
   const textSizeClasses = {
     small: 'text-lg',

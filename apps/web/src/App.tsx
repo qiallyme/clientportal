@@ -5,6 +5,7 @@ import { SocketProvider } from './contexts/SocketContext';
 import { FormsProvider } from './contexts/FormsContext';
 import { SubmissionsProvider } from './contexts/SubmissionsContext';
 import Layout from './components/Layout/Layout';
+import LandingPage from './components/Landing/LandingPage';
 import EnterpriseLogin from './components/Auth/EnterpriseLogin';
 import Register from './components/Auth/Register';
 import EnterpriseMagicLink from './components/Auth/EnterpriseMagicLink';
@@ -18,22 +19,34 @@ import './App.css';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useSupabaseAuth();
 
+  // CRITICAL: Don't redirect while loading to prevent loops
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  // Only redirect if we're sure the user is not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 // Public Route Component (redirect to dashboard if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useSupabaseAuth();
 
+  // CRITICAL: Don't redirect while loading to prevent loops
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
+  // Only redirect if we're sure the user is authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 // Admin Only Route Component
@@ -61,7 +74,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      <Route path="/" element={<LandingPage />} />
       
       {/* Public Routes */}
       <Route

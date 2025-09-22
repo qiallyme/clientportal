@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForms } from '../../contexts/FormsContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { submissionsAPI } from '../../services/api';
 import './FormSubmission.css';
 
@@ -9,7 +9,7 @@ const FormSubmission: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentForm, loading, error, fetchFormForSubmission, clearError } = useForms();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSupabaseAuth();
   
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +94,7 @@ const FormSubmission: React.FC = () => {
         return (
           <input
             type={field.type}
+            id={field.name}
             name={field.name}
             value={fieldValue}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -106,6 +107,7 @@ const FormSubmission: React.FC = () => {
       case 'textarea':
         return (
           <textarea
+            id={field.name}
             name={field.name}
             value={fieldValue}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -119,6 +121,7 @@ const FormSubmission: React.FC = () => {
       case 'select':
         return (
           <select
+            id={field.name}
             name={field.name}
             value={fieldValue}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -171,6 +174,7 @@ const FormSubmission: React.FC = () => {
         return (
           <input
             type="date"
+            id={field.name}
             name={field.name}
             value={fieldValue}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
@@ -183,6 +187,7 @@ const FormSubmission: React.FC = () => {
         return (
           <input
             type="file"
+            id={field.name}
             name={field.name}
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -301,7 +306,7 @@ const FormSubmission: React.FC = () => {
         <div className="form-fields">
           {currentForm.fields.map((field, index) => (
             <div key={index} className="form-field">
-              <label className="field-label">
+              <label htmlFor={field.name} className="field-label">
                 {field.label}
                 {field.required && <span className="required">*</span>}
               </label>

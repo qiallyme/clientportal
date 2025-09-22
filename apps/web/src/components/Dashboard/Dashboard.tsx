@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { submissionsAPI, formsAPI } from '../../services/api';
 import { Submission, Form } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const { socket, joinRoom } = useSocket();
   const [stats, setStats] = useState({
     totalSubmissions: 0,
@@ -72,26 +72,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: '#f59e0b',
-      'in-progress': '#3b82f6',
-      completed: '#10b981',
-      rejected: '#ef4444',
-      'on-hold': '#6b7280',
-    };
-    return colors[status] || '#6b7280';
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const colors: Record<string, string> = {
-      low: '#10b981',
-      medium: '#f59e0b',
-      high: '#ef4444',
-      urgent: '#dc2626',
-    };
-    return colors[priority] || '#6b7280';
-  };
 
   if (loading) {
     return (
@@ -164,13 +144,13 @@ const Dashboard: React.FC = () => {
                   <div className="submission-meta">
                     <span
                       className="status-badge"
-                      style={{ backgroundColor: getStatusColor(submission.status) }}
+                      data-status={submission.status}
                     >
                       {submission.status}
                     </span>
                     <span
                       className="priority-badge"
-                      style={{ backgroundColor: getPriorityColor(submission.priority) }}
+                      data-priority={submission.priority}
                     >
                       {submission.priority}
                     </span>

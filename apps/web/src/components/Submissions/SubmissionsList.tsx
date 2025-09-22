@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSubmissions } from '../../contexts/SubmissionsContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { User } from '../../types';
+import { authAPI } from '../../services/api';
 import './SubmissionsList.css';
 
 const SubmissionsList: React.FC = () => {
@@ -15,7 +17,8 @@ const SubmissionsList: React.FC = () => {
     deleteSubmission,
     fetchStats 
   } = useSubmissions();
-  const { user } = useAuth();
+  const { user: supabaseUser, isAuthenticated } = useSupabaseAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   
   const [filters, setFilters] = useState({
     search: '',
@@ -26,6 +29,26 @@ const SubmissionsList: React.FC = () => {
     sortBy: 'createdAt',
     sortOrder: 'desc',
   });
+
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (isAuthenticated && supabaseUser) {
+        try {
+          const response = await authAPI.getMe();
+          if (response.data.success && response.data.data) {
+            setUserProfile(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    fetchUserProfile();
+  }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
     fetchSubmissions({
@@ -162,6 +185,7 @@ const SubmissionsList: React.FC = () => {
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
               className="filter-select"
+              aria-label="Filter by status"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -176,6 +200,7 @@ const SubmissionsList: React.FC = () => {
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
               className="filter-select"
+              aria-label="Filter by priority"
             >
               <option value="all">All Priority</option>
               <option value="urgent">Urgent</option>
@@ -189,6 +214,7 @@ const SubmissionsList: React.FC = () => {
               value={filters.sortBy}
               onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
               className="filter-select"
+              aria-label="Sort by field"
             >
               <option value="createdAt">Sort by Date</option>
               <option value="status">Sort by Status</option>
@@ -201,6 +227,7 @@ const SubmissionsList: React.FC = () => {
               value={filters.sortOrder}
               onChange={(e) => setFilters({ ...filters, sortOrder: e.target.value })}
               className="filter-select"
+              aria-label="Sort order"
             >
               <option value="desc">Newest First</option>
               <option value="asc">Oldest First</option>
@@ -293,7 +320,7 @@ const SubmissionsList: React.FC = () => {
                       >
                         View
                       </Link>
-                      {user?.permissions.canEditSubmissions && (
+                      {userProfile?.permissions.canEditSubmissions && (
                         <Link
                           to={`/submissions/${submission._id}/edit`}
                           className="btn btn-sm btn-outline"
@@ -301,7 +328,7 @@ const SubmissionsList: React.FC = () => {
                           Edit
                         </Link>
                       )}
-                      {user?.permissions.canEditSubmissions && (
+                      {userProfile?.permissions.canEditSubmissions && (
                         <button
                           onClick={() => handleDelete(submission._id, submission.submissionNumber)}
                           className="btn btn-sm btn-danger"

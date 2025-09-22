@@ -1,0 +1,54 @@
+{
+  "name": "client-portal",
+  "version": "1.0.0",
+  "description": "Cross-region client portal with real-time updates",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "cd apps/web && npm start",
+    "server": "nodemon server.js",
+    "build": "cd apps/web && npm install && npm run build",
+    "build:prod": "npm run build && npm run build:backend",
+    "build:backend": "echo 'Backend build complete'",
+    "deploy": "node deploy-fast.js",
+    "deploy:api": "node deploy-fast.js --api-only",
+    "deploy:frontend": "node deploy-fast.js --frontend-only",
+    "deploy:cloudflare": "npm run build:prod && wrangler deploy",
+    "deploy:pages": "cd apps/web && npm install && npm run build && wrangler pages deploy build",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix apps/web && npm run build --prefix apps/web"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.3",
+    "@supabase/supabase-js": "^2.57.4",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.0.0",
+    "hono": "^4.9.8",
+    "jose": "^6.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.16.3",
+    "socket.io": "^4.7.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250921.0",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.9.2"
+  },
+  "keywords": [
+    "portal",
+    "client",
+    "real-time",
+    "cross-region"
+  ],
+  "author": "Your Company",
+  "license": "MIT"
+}
