@@ -22,5 +22,5 @@ command = "cd frontend && npm install && npm run build"
 pages_build_output_dir = "frontend/build"
 
 [[routes]]
-pattern = "portal.qially.com/*"
+pattern = "portal.qially.com/api/*"
 zone_name = "qially.com"
