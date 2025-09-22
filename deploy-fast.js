@@ -53,7 +53,7 @@ function checkGitStatus() {
   }
 }
 
-async function deployAPI() {
+async function deployAPIService() {
   log('\n🚀 Deploying API (Workers)...', 'blue');
   
   const apiDir = path.join(process.cwd(), 'workers', 'api');
@@ -73,7 +73,7 @@ async function deployAPI() {
   return true;
 }
 
-async function deployFrontend() {
+async function deployFrontendService() {
   log('\n🌐 Deploying Frontend (Pages)...', 'blue');
   
   const frontendDir = path.join(process.cwd(), 'frontend');
@@ -114,17 +114,17 @@ async function main() {
   checkGitStatus();
   
   const args = process.argv.slice(2);
-  const deployAPI = !args.includes('--frontend-only');
-  const deployFrontend = !args.includes('--api-only');
+  const shouldDeployAPI = !args.includes('--frontend-only');
+  const shouldDeployFrontend = !args.includes('--api-only');
   
   let success = true;
   
-  if (deployAPI) {
-    success = await deployAPI() && success;
+  if (shouldDeployAPI) {
+    success = await deployAPIService() && success;
   }
   
-  if (deployFrontend) {
-    success = await deployFrontend() && success;
+  if (shouldDeployFrontend) {
+    success = await deployFrontendService() && success;
   }
   
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
