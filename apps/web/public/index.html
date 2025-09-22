@@ -5,8 +5,9 @@
     <link rel="icon" href="%PUBLIC_URL%/hummingbird.svg" type="image/svg+xml" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- theme-color is supported by Chrome, Safari, Edge, and mobile browsers -->
-    <meta name="theme-color" content="#000000" />
+    <!-- theme-color is supported by Chrome, Safari, Edge, and mobile browsers (not Firefox/Opera) -->
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta
       name="description"
       content="QiAlly Portal - Enterprise client portal for form management and submissions"
