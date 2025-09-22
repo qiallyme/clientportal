@@ -77,8 +77,10 @@ PORT=5000
 NODE_ENV=development
 REGION=us
 
-# Client URL
+# Client URL (development)
 CLIENT_URL=http://localhost:3000
+# Client URL (production)
+# CLIENT_URL=https://portal.qially.com
 ```
 
 #### Frontend (client/.env)
@@ -89,8 +91,13 @@ cp env.example .env
 
 Edit `client/.env`:
 ```env
+# Development URLs
 REACT_APP_API_URL=http://localhost:5000/api
 REACT_APP_SOCKET_URL=http://localhost:5000
+
+# Production URLs (uncomment for production)
+# REACT_APP_API_URL=https://api.qially.com
+# REACT_APP_SOCKET_URL=https://api.qially.com
 ```
 
 ### 4. Start the Application
