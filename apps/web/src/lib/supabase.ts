@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration with validation
-const envSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const envSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const envSupabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const envSupabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 // Use environment variables if they're valid, otherwise use fallbacks
 const supabaseUrl = (envSupabaseUrl && envSupabaseUrl.startsWith('http')) 

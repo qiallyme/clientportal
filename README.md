@@ -93,14 +93,14 @@ Edit `apps/web/.env.local`:
 
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+REACT_APP_SUPABASE_URL=https://your-project.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 # API Configuration (production)
-VITE_API_URL=https://api.qially.com
+REACT_APP_API_URL=https://api.qially.com
 
 # API Configuration (development)
-# VITE_API_URL=http://localhost:8787
+# REACT_APP_API_URL=http://localhost:8787
 ```
 
 #### Root Environment
@@ -230,9 +230,9 @@ clientportal/
 **Environment Variables:**
 
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_API_URL=https://api.qially.com
+REACT_APP_SUPABASE_URL=https://your-project.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+REACT_APP_API_URL=https://api.qially.com
 ```
 
 **Custom Domain:**
@@ -339,9 +339,9 @@ npm test
 ### Frontend (Vite)
 
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
-VITE_API_URL=https://api.qially.com
+REACT_APP_SUPABASE_URL=https://your-project.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+REACT_APP_API_URL=https://api.qially.com
 ```
 
 ### Backend (Cloudflare Workers)
