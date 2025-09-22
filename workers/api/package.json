@@ -1,5 +1,5 @@
 {
-  "name": "qieos-api",
+  "name": "client-portal-api",
   "private": true,
   "type": "module",
   "scripts": {
