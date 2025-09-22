@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
@@ -24,6 +25,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:fast": "node build-cache.js build",
+    "install:fast": "node build-cache.js install",
+    "deploy": "npm run build && wrangler pages deploy build --project-name=clientportal",
+    "deploy:fast": "npm run build:fast && wrangler pages deploy build --project-name=clientportal",
+    "cache:clean": "node build-cache.js clean",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

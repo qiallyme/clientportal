@@ -11,6 +11,9 @@
     "build": "cd frontend && npm install && npm run build",
     "build:prod": "npm run build && npm run build:backend",
     "build:backend": "echo 'Backend build complete'",
+    "deploy": "node deploy-fast.js",
+    "deploy:api": "node deploy-fast.js --api-only",
+    "deploy:frontend": "node deploy-fast.js --frontend-only",
     "deploy:cloudflare": "npm run build:prod && wrangler deploy",
     "deploy:pages": "cd frontend && npm install && npm run build && wrangler pages deploy build",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"

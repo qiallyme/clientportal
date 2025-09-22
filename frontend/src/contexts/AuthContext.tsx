@@ -109,19 +109,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Try to validate the token by calling /api/auth/me
           const response = await authAPI.getMe();
           
-          // If the response includes a new token, update it
-          if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            dispatch({
-              type: 'AUTH_SUCCESS',
-              payload: { user: response.data.data!, token: response.data.token },
-            });
-          } else {
-            dispatch({
-              type: 'AUTH_SUCCESS',
-              payload: { user: response.data.data!, token },
-            });
-          }
+          // Token validation successful, user is authenticated
+          dispatch({
+            type: 'AUTH_SUCCESS',
+            payload: { user: response.data, token },
+          });
         } catch (error) {
           // Token is invalid, clear storage
           localStorage.removeItem('token');
@@ -146,7 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Get user info from /api/auth/me
       const userResponse = await authAPI.getMe();
-      const user = userResponse.data.data!;
+      const user = userResponse.data;
 
       localStorage.setItem('user', JSON.stringify(user));
 

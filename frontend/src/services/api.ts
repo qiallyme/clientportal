@@ -77,7 +77,7 @@ export const authAPI = {
   }): Promise<AxiosResponse<AuthResponse>> =>
     api.post('/auth/register', userData),
   
-  getMe: (): Promise<AxiosResponse<ApiResponse<User>>> =>
+  getMe: (): Promise<AxiosResponse<User>> =>
     api.get('/auth/me'),
   
   refreshToken: (): Promise<AxiosResponse<AuthResponse>> =>

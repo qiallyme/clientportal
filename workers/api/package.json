@@ -4,7 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "build:worker": "tsc",
+    "build": "npm run build:worker",
     "deploy": "wrangler deploy",
-    "check": "tsc --noEmit"
+    "deploy:fast": "wrangler deploy --compatibility-date=2025-09-10",
+    "check": "tsc --noEmit",
+    "test:auth": "node test-auth-flow.js",
+    "deploy:safe": "npm run check && npm run test:auth && npm run deploy",
+    "deploy:safe:fast": "npm run check && npm run test:auth && npm run deploy:fast"
   }
 }
