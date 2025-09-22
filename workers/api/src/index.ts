@@ -23,7 +23,8 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 const allow = [
   "http://localhost:3000",
   "http://localhost:5173", 
-  "https://dd30c420.clientportal-3pk.pages.dev"
+  "https://dd30c420.clientportal-3pk.pages.dev",
+  "https://portal.qially.com"
 ];
 
 app.use("*", requestId);
