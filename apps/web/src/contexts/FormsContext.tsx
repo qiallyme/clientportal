@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { Form } from '../types';
-import { formsAPI } from '../services/api';
+import { supabaseFormsAPI } from '../services/supabaseForms';
 
 interface FormsState {
   forms: Form[];
@@ -121,13 +121,21 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   }) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      const response = await formsAPI.getForms(params);
-      const { data, total, pages, current } = response.data;
+      const response = await supabaseFormsAPI.getForms(params);
+      const { data, total, pages, current } = response;
+      
+      // Fetch submission counts for each form
+      const formsWithCounts = await Promise.all(
+        data.map(async (form) => {
+          const count = await supabaseFormsAPI.getFormSubmissionsCount(form._id);
+          return { ...form, submissionCount: count };
+        })
+      );
       
       dispatch({
         type: 'FORMS_SUCCESS',
         payload: {
-          forms: data,
+          forms: formsWithCounts,
           pagination: {
             page: current || 1,
             limit: params?.limit || 10,
@@ -139,7 +147,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to fetch forms',
+        payload: error.message || 'Failed to fetch forms',
       });
     }
   }, []);
@@ -147,15 +155,18 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const fetchForm = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      const response = await formsAPI.getForm(id);
+      const form = await supabaseFormsAPI.getForm(id);
+      const count = await supabaseFormsAPI.getFormSubmissionsCount(id);
+      const formWithCount = { ...form, submissionCount: count };
+      
       dispatch({
         type: 'FORM_SUCCESS',
-        payload: response.data.data!,
+        payload: formWithCount,
       });
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to fetch form',
+        payload: error.message || 'Failed to fetch form',
       });
     }
   }, []);
@@ -163,15 +174,18 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const fetchFormForSubmission = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      const response = await formsAPI.getFormForSubmission(id);
+      const form = await supabaseFormsAPI.getFormForSubmission(id);
+      const count = await supabaseFormsAPI.getFormSubmissionsCount(id);
+      const formWithCount = { ...form, submissionCount: count };
+      
       dispatch({
         type: 'FORM_SUCCESS',
-        payload: response.data.data!,
+        payload: formWithCount,
       });
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to fetch form',
+        payload: error.message || 'Failed to fetch form',
       });
     }
   }, []);
@@ -179,8 +193,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const createForm = useCallback(async (formData: Partial<Form>): Promise<Form> => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      const response = await formsAPI.createForm(formData);
-      const newForm = response.data.data!;
+      const newForm = await supabaseFormsAPI.createForm(formData);
       
       // Refresh forms list
       await fetchForms();
@@ -189,7 +202,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to create form',
+        payload: error.message || 'Failed to create form',
       });
       throw error;
     }
@@ -198,25 +211,26 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const updateForm = useCallback(async (id: string, formData: Partial<Form>): Promise<Form> => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      const response = await formsAPI.updateForm(id, formData);
-      const updatedForm = response.data.data!;
+      const updatedForm = await supabaseFormsAPI.updateForm(id, formData);
+      const count = await supabaseFormsAPI.getFormSubmissionsCount(id);
+      const formWithCount = { ...updatedForm, submissionCount: count };
       
       // Update current form if it's the one being updated
       if (state.currentForm?._id === id) {
         dispatch({
           type: 'FORM_SUCCESS',
-          payload: updatedForm,
+          payload: formWithCount,
         });
       }
       
       // Refresh forms list
       await fetchForms();
       
-      return updatedForm;
+      return formWithCount;
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to update form',
+        payload: error.message || 'Failed to update form',
       });
       throw error;
     }
@@ -225,7 +239,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
   const deleteForm = useCallback(async (id: string) => {
     try {
       dispatch({ type: 'FORMS_LOADING' });
-      await formsAPI.deleteForm(id);
+      await supabaseFormsAPI.deleteForm(id);
       
       // Clear current form if it's the one being deleted
       if (state.currentForm?._id === id) {
@@ -237,7 +251,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
-        payload: error.response?.data?.message || 'Failed to delete form',
+        payload: error.message || 'Failed to delete form',
       });
     }
   }, [fetchForms, state.currentForm?._id]);
