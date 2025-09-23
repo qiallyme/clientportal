@@ -120,8 +120,10 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
     isActive?: boolean;
   }) => {
     try {
+      console.log('🚀 FormsContext: fetchForms called with params:', params);
       dispatch({ type: 'FORMS_LOADING' });
       const response = await supabaseFormsAPI.getForms(params);
+      console.log('🚀 FormsContext: got response:', response);
       const { data, total, pages, current } = response;
       
       // Fetch submission counts for each form

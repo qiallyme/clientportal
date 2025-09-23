@@ -48,6 +48,8 @@ export const supabaseFormsAPI = {
   getForms: async (params?: FormsQueryParams): Promise<PaginatedFormsResponse> => {
     const { page = 1, limit = 10, search, isActive } = params || {};
     
+    console.log('🔍 Fetching forms with params:', params);
+    
     let query = supabase
       .from('forms')
       .select('*', { count: 'exact' });
@@ -69,16 +71,21 @@ export const supabaseFormsAPI = {
     // Order by created_at desc
     query = query.order('created_at', { ascending: false });
 
+    console.log('🔍 Executing query...');
     const { data, error, count } = await query;
 
+    console.log('🔍 Query result:', { data, error, count });
+
     if (error) {
-      console.error('Error fetching forms:', error);
+      console.error('❌ Error fetching forms:', error);
       throw new Error(error.message);
     }
 
     const forms = (data || []).map(convertSupabaseForm);
     const total = count || 0;
     const pages = Math.ceil(total / limit);
+
+    console.log('✅ Converted forms:', forms);
 
     return {
       data: forms,
