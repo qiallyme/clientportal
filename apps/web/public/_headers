@@ -1,5 +1,6 @@
 # Cloudflare Pages Headers
 # Security headers for production
+# This file uses Cloudflare Pages headers format, not YAML
 
 /*
   X-Frame-Options: DENY

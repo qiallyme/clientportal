@@ -3,6 +3,7 @@ import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { submissionsAPI, formsAPI, authAPI } from '../../services/api';
 import { Submission, Form, User } from '../../types';
+import { Loading } from '../Loading';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -21,26 +22,46 @@ const Dashboard: React.FC = () => {
 
   // Fetch user profile when authenticated
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUserProfile = async () => {
       if (isAuthenticated && supabaseUser) {
         try {
           const response = await authAPI.getMe();
-          if (response.data.success && response.data.data) {
+          if (isMounted && response.data.success && response.data.data) {
             setUserProfile(response.data.data);
           }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
         }
       } else {
-        setUserProfile(null);
+        if (isMounted) {
+          setUserProfile(null);
+        }
       }
     };
 
     fetchUserProfile();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
-    loadDashboardData();
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) {
+        await loadDashboardData();
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -49,27 +70,30 @@ const Dashboard: React.FC = () => {
       joinRoom('dashboard');
 
       // Listen for new submissions
-      socket.on('new-submission', (data) => {
+      const handleNewSubmission = (data: any) => {
         setRecentSubmissions(prev => [data.submission, ...prev.slice(0, 9)]);
         setStats(prev => ({
           ...prev,
           totalSubmissions: prev.totalSubmissions + 1,
           recentSubmissions: prev.recentSubmissions + 1,
         }));
-      });
+      };
 
       // Listen for submission updates
-      socket.on('submission-updated', (data) => {
+      const handleSubmissionUpdated = (data: any) => {
         setRecentSubmissions(prev => 
           prev.map(sub => 
             sub._id === data.submission._id ? data.submission : sub
           )
         );
-      });
+      };
+
+      socket.on('new-submission', handleNewSubmission);
+      socket.on('submission-updated', handleSubmissionUpdated);
 
       return () => {
-        socket.off('new-submission');
-        socket.off('submission-updated');
+        socket.off('new-submission', handleNewSubmission);
+        socket.off('submission-updated', handleSubmissionUpdated);
       };
     }
   }, [socket, joinRoom]);
@@ -97,7 +121,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="dashboard">
-        <div className="loading">Loading dashboard...</div>
+        <Loading size="large" message="Loading dashboard..." />
       </div>
     );
   }
@@ -194,7 +218,7 @@ const Dashboard: React.FC = () => {
                     <h4>{form.title}</h4>
                     <p>{form.description || 'No description'}</p>
                     <p className="form-meta">
-                      {form.submissionCount} submissions • Created by {form.createdBy?.name || 'Unknown User'}
+                      {form.submissionCount} submissions • Created by {form.createdBy || 'Unknown User'}
                     </p>
                   </div>
                   <div className="form-status">

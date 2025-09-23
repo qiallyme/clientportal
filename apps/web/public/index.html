@@ -6,13 +6,67 @@
     <link rel="icon" href="/favicon.ico" />
     <link rel="icon" href="/hummingbird.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- theme-color is supported by Chrome, Safari, Edge, and mobile browsers (not Firefox/Opera) -->
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.qially.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https: blob:;
+      connect-src 'self' https://*.supabase.co https://*.qially.com wss://*.qially.com;
+      frame-src 'none';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+    " />
+
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://vwqkhjnkummwtvfxgqml.supabase.co" />
+    <link rel="preconnect" href="https://api.qially.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Theme and Icons -->
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
-    <meta
-      name="description"
-      content="QiAlly Portal - Enterprise client portal for form management and submissions"
-    />
+
+    <!-- SEO and Social Meta Tags -->
+    <title>QiAlly Portal - Enterprise Client Portal</title>
+    <meta name="description" content="QiAlly Portal - Enterprise client portal for form management and submissions. Secure, real-time form handling with role-based access control." />
+    <meta name="keywords" content="enterprise portal, form management, client portal, QiAlly, submissions, real-time" />
+    <meta name="author" content="QiAlly" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://portal.qially.com/" />
+    <meta property="og:title" content="QiAlly Portal - Enterprise Client Portal" />
+    <meta property="og:description" content="Enterprise client portal for form management and submissions" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://portal.qially.com/" />
+    <meta property="twitter:title" content="QiAlly Portal - Enterprise Client Portal" />
+    <meta property="twitter:description" content="Enterprise client portal for form management and submissions" />
+    <meta property="twitter:image" content="%PUBLIC_URL%/logo512.png" />
+
+    <!-- Additional Meta Tags -->
+    <meta name="application-name" content="QiAlly Portal" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="QiAlly Portal" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="msapplication-tap-highlight" content="no" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -28,10 +82,26 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>QiAlly Portal</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <div style="text-align: center; padding: 2rem; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <h1>JavaScript Required</h1>
+        <p>You need to enable JavaScript to run this app.</p>
+        <p style="margin-top: 1rem; color: #666;">
+          QiAlly Portal requires JavaScript for security and functionality.<br/>
+          Please enable JavaScript in your browser settings and refresh the page.
+        </p>
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; max-width: 400px;">
+          <strong>How to enable JavaScript:</strong>
+          <ul style="text-align: left; margin: 0.5rem 0 0 1rem;">
+            <li><strong>Chrome:</strong> Settings → Privacy and security → Site settings → JavaScript</li>
+            <li><strong>Firefox:</strong> Settings → Privacy & Security → Permissions → JavaScript</li>
+            <li><strong>Safari:</strong> Preferences → Security → Enable JavaScript</li>
+          </ul>
+        </div>
+      </div>
+    </noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.

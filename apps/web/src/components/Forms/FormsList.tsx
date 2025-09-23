@@ -4,6 +4,7 @@ import { useForms } from '../../contexts/FormsContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { User } from '../../types';
 import { authAPI } from '../../services/api';
+import { Loading } from '../Loading';
 import './FormsList.css';
 
 const FormsList: React.FC = () => {
@@ -15,22 +16,30 @@ const FormsList: React.FC = () => {
 
   // Fetch user profile when authenticated
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUserProfile = async () => {
       if (isAuthenticated && supabaseUser) {
         try {
           const response = await authAPI.getMe();
-          if (response.data.success && response.data.data) {
+          if (isMounted && response.data.success && response.data.data) {
             setUserProfile(response.data.data);
           }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
         }
       } else {
-        setUserProfile(null);
+        if (isMounted) {
+          setUserProfile(null);
+        }
       }
     };
 
     fetchUserProfile();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
@@ -64,7 +73,7 @@ const FormsList: React.FC = () => {
   if (loading && forms.length === 0) {
     return (
       <div className="forms-list">
-        <div className="loading">Loading forms...</div>
+        <Loading size="large" message="Loading forms..." />
       </div>
     );
   }
@@ -88,12 +97,15 @@ const FormsList: React.FC = () => {
 
       <div className="forms-filters">
         <div className="search-box">
+          <label htmlFor="search-forms" className="sr-only">Search forms</label>
           <input
+            id="search-forms"
             type="text"
             placeholder="Search forms..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
+            aria-label="Search forms"
           />
         </div>
         <div className="status-filter">
@@ -171,7 +183,7 @@ const FormsList: React.FC = () => {
                     Edit
                   </Link>
                 )}
-                {userProfile?.role === 'admin' && (
+                {userProfile?.permissions.canViewAllSubmissions && (
                   <Link to={`/forms/${form._id}/submissions`} className="btn btn-outline">
                     Submissions
                   </Link>
@@ -180,6 +192,8 @@ const FormsList: React.FC = () => {
                   <button
                     onClick={() => handleDelete(form._id, form.title)}
                     className="btn btn-danger"
+                    aria-label={`Delete form "${form.title}"`}
+                    title={`Delete form "${form.title}"`}
                   >
                     Delete
                   </button>

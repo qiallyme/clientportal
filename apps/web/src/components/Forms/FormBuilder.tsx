@@ -45,11 +45,11 @@ const FormBuilder: React.FC = () => {
         isActive: currentForm.isActive,
         isPublic: currentForm.isPublic,
         settings: {
-          allowMultipleSubmissions: currentForm.settings.allowMultipleSubmissions,
-          requireAuthentication: currentForm.settings.requireAuthentication,
+          allowMultipleSubmissions: currentForm.settings.allowMultipleSubmissions ?? false,
+          requireAuthentication: currentForm.settings.requireAuthentication ?? true,
           notificationEmail: currentForm.settings.notificationEmail || '',
           autoResponse: {
-            enabled: currentForm.settings.autoResponse?.enabled || false,
+            enabled: currentForm.settings.autoResponse?.enabled ?? false,
             subject: currentForm.settings.autoResponse?.subject || '',
             message: currentForm.settings.autoResponse?.message || '',
           },
@@ -238,7 +238,8 @@ const FormBuilder: React.FC = () => {
                           onClick={() => moveField(index, 'up')}
                           disabled={index === 0}
                           className="btn btn-sm btn-outline"
-                          title="Move up"
+                          title="Move field up"
+                          aria-label={`Move field ${index + 1} up`}
                         >
                           ↑
                         </button>
@@ -247,7 +248,8 @@ const FormBuilder: React.FC = () => {
                           onClick={() => moveField(index, 'down')}
                           disabled={index === fields.length - 1}
                           className="btn btn-sm btn-outline"
-                          title="Move down"
+                          title="Move field down"
+                          aria-label={`Move field ${index + 1} down`}
                         >
                           ↓
                         </button>
@@ -256,6 +258,7 @@ const FormBuilder: React.FC = () => {
                           onClick={() => removeField(index)}
                           className="btn btn-sm btn-danger"
                           title="Remove field"
+                          aria-label={`Remove field ${index + 1}`}
                         >
                           ×
                         </button>

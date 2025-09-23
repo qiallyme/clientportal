@@ -6,14 +6,15 @@ import { createClient } from '@supabase/supabase-js';
 // Supabase configuration with validation
 const envSupabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const envSupabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
 
 // Use environment variables if they're valid, otherwise use fallbacks
-const supabaseUrl = (envSupabaseUrl && envSupabaseUrl.startsWith('http')) 
-  ? envSupabaseUrl 
+const supabaseUrl = (envSupabaseUrl && envSupabaseUrl.startsWith('http'))
+  ? envSupabaseUrl
   : 'https://vwqkhjnkummwtvfxgqml.supabase.co';
 
-const supabaseAnonKey = (envSupabaseAnonKey && envSupabaseAnonKey.length > 50) 
-  ? envSupabaseAnonKey 
+const supabaseAnonKey = (envSupabaseAnonKey && envSupabaseAnonKey.length > 50)
+  ? envSupabaseAnonKey
   : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3cWtoam5rdW1td3R2ZnhncW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMDMwNDksImV4cCI6MjA3MTU3OTA0OX0.Q1_W-sq8iKVPfJ2HfTS2hGNmK5jjzsy50cHszhB_6VQ';
 
 // Debug logging (remove in production)
@@ -21,7 +22,9 @@ console.log('Supabase Config:', {
   envUrl: envSupabaseUrl,
   envKey: envSupabaseAnonKey ? `${envSupabaseAnonKey.substring(0, 20)}...` : 'undefined',
   finalUrl: supabaseUrl,
-  finalKey: `${supabaseAnonKey.substring(0, 20)}...`
+  finalKey: `${supabaseAnonKey.substring(0, 20)}...`,
+  demoMode: isDemoMode,
+  demoMessage: isDemoMode ? '🚀 RUNNING IN DEMO MODE' : '🔒 RUNNING IN PRODUCTION MODE'
 });
 
 // 🔒 LOCK-START: Supabase client configuration — Working authentication setup

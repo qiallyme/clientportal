@@ -4,6 +4,7 @@ import { useForms } from '../../contexts/FormsContext';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { User } from '../../types';
 import { authAPI } from '../../services/api';
+import { Loading } from '../Loading';
 import './FormViewer.css';
 
 const FormViewer: React.FC = () => {
@@ -14,35 +15,53 @@ const FormViewer: React.FC = () => {
 
   // Fetch user profile when authenticated
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUserProfile = async () => {
       if (isAuthenticated && supabaseUser) {
         try {
           const response = await authAPI.getMe();
-          if (response.data.success && response.data.data) {
+          if (isMounted && response.data.success && response.data.data) {
             setUserProfile(response.data.data);
           }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
         }
       } else {
-        setUserProfile(null);
+        if (isMounted) {
+          setUserProfile(null);
+        }
       }
     };
 
     fetchUserProfile();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
-    if (id) {
-      fetchForm(id);
-    }
-    return () => clearError();
-  }, [id, fetchForm, clearError]);
+    let isMounted = true;
+    
+    const loadForm = async () => {
+      if (isMounted && id) {
+        await fetchForm(id);
+      }
+    };
+    
+    loadForm();
+    
+    return () => {
+      isMounted = false;
+      clearError();
+    };
+  }, [id]); // Removed fetchForm and clearError from dependencies
 
   if (loading) {
     return (
       <div className="form-viewer">
-        <div className="loading">Loading form...</div>
+        <Loading size="large" message="Loading form..." />
       </div>
     );
   }
@@ -233,7 +252,7 @@ const FormViewer: React.FC = () => {
             <div className="detail-item">
               <span className="detail-label">Created by:</span>
               <span className="detail-value">
-                {currentForm.createdBy?.name || 'Unknown User'}
+                {currentForm.createdBy || 'Unknown User'}
               </span>
             </div>
             <div className="detail-item">

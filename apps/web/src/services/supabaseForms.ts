@@ -1,13 +1,16 @@
 import { supabase } from '../lib/supabase';
-import { Form } from '../types';
+import { Form, FormSettings } from '../types';
 
 export interface SupabaseForm {
   id: string;
   org_id: string;
   owner_id: string;
   title: string;
-  description?: string;
-  schema_json: any;
+  description?: string | null;
+  schema_json: {
+    fields?: any[];
+    settings?: Partial<FormSettings>;
+  } | null;
   is_active: boolean;
   is_public: boolean;
   created_at: string;
@@ -28,18 +31,36 @@ export interface PaginatedFormsResponse {
   current: number;
 }
 
-// Convert Supabase form to our Form type
+const defaultFormSettings: FormSettings = {
+  allowMultipleSubmissions: false,
+  requireAuthentication: true,
+  notificationEmail: '',
+  autoResponse: {
+    enabled: false,
+    subject: '',
+    message: '',
+  },
+};
+
+// Convert Supabase form to our Form type with hierarchical structure
 const convertSupabaseForm = (supabaseForm: SupabaseForm): Form => {
   return {
     _id: supabaseForm.id,
+    tenantId: supabaseForm.org_id, // Map org_id to tenantId for hierarchical access
+    departmentId: undefined, // This would be populated from a separate query if needed
     title: supabaseForm.title,
     description: supabaseForm.description || '',
     fields: supabaseForm.schema_json?.fields || [],
     isActive: supabaseForm.is_active,
     isPublic: supabaseForm.is_public,
+    createdBy: supabaseForm.owner_id || null,
+    settings: {
+      ...defaultFormSettings,
+      ...(supabaseForm.schema_json?.settings || {}),
+    },
+    submissionCount: 0, // We'll need to fetch this separately
     createdAt: supabaseForm.created_at,
     updatedAt: supabaseForm.updated_at,
-    submissionCount: 0, // We'll need to fetch this separately
   };
 };
 
@@ -153,7 +174,10 @@ export const supabaseFormsAPI = {
       owner_id: user.id,
       title: formData.title || '',
       description: formData.description || '',
-      schema_json: { fields: formData.fields || [] },
+      schema_json: {
+        fields: formData.fields || [],
+        settings: formData.settings || defaultFormSettings
+      },
       is_active: formData.isActive ?? true,
       is_public: formData.isPublic ?? false,
     };
@@ -178,7 +202,12 @@ export const supabaseFormsAPI = {
 
     if (formData.title !== undefined) updateData.title = formData.title;
     if (formData.description !== undefined) updateData.description = formData.description;
-    if (formData.fields !== undefined) updateData.schema_json = { fields: formData.fields };
+    if (formData.fields !== undefined || formData.settings !== undefined) {
+      updateData.schema_json = {
+        fields: formData.fields || [],
+        settings: formData.settings || defaultFormSettings
+      };
+    }
     if (formData.isActive !== undefined) updateData.is_active = formData.isActive;
     if (formData.isPublic !== undefined) updateData.is_public = formData.isPublic;
     

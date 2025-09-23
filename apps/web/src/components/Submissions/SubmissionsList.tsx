@@ -32,38 +32,58 @@ const SubmissionsList: React.FC = () => {
 
   // Fetch user profile when authenticated
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUserProfile = async () => {
       if (isAuthenticated && supabaseUser) {
         try {
           const response = await authAPI.getMe();
-          if (response.data.success && response.data.data) {
+          if (isMounted && response.data.success && response.data.data) {
             setUserProfile(response.data.data);
           }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
         }
       } else {
-        setUserProfile(null);
+        if (isMounted) {
+          setUserProfile(null);
+        }
       }
     };
 
     fetchUserProfile();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, supabaseUser]);
 
   useEffect(() => {
-    fetchSubmissions({
-      page: 1,
-      limit: 10,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.status !== 'all' && { status: filters.status }),
-      ...(filters.priority !== 'all' && { priority: filters.priority }),
-      ...(filters.assignedTo !== 'all' && { assignedTo: filters.assignedTo }),
-      ...(filters.formId !== 'all' && { formId: filters.formId }),
-      sortBy: filters.sortBy,
-      sortOrder: filters.sortOrder,
-    });
-    fetchStats();
-  }, [filters, fetchSubmissions, fetchStats]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) {
+        await fetchSubmissions({
+          page: 1,
+          limit: 10,
+          ...(filters.search && { search: filters.search }),
+          ...(filters.status !== 'all' && { status: filters.status }),
+          ...(filters.priority !== 'all' && { priority: filters.priority }),
+          ...(filters.assignedTo !== 'all' && { assignedTo: filters.assignedTo }),
+          ...(filters.formId !== 'all' && { formId: filters.formId }),
+          sortBy: filters.sortBy,
+          sortOrder: filters.sortOrder,
+        });
+        await fetchStats();
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [filters]); // Removed fetchSubmissions and fetchStats from dependencies
 
   const handleDelete = async (id: string, submissionNumber: string) => {
     if (window.confirm(`Are you sure you want to delete submission ${submissionNumber}?`)) {

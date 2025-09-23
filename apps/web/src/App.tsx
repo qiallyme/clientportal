@@ -4,6 +4,7 @@ import { SupabaseAuthProvider, useSupabaseAuth } from './contexts/SupabaseAuthCo
 import { SocketProvider } from './contexts/SocketContext';
 import { FormsProvider } from './contexts/FormsContext';
 import { SubmissionsProvider } from './contexts/SubmissionsContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Layout from './components/Layout/Layout';
 import LandingPage from './components/Landing/LandingPage';
 import EnterpriseLogin from './components/Auth/EnterpriseLogin';
@@ -17,16 +18,24 @@ import './App.css';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useSupabaseAuth();
+  const { isAuthenticated, loading, user } = useSupabaseAuth();
+  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
 
   // CRITICAL: Don't redirect while loading to prevent loops
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  // Only redirect if we're sure the user is not authenticated
-  if (!isAuthenticated) {
+  // MVP: Allow access even without authentication (demo mode)
+  // Only redirect if we're sure the user is not authenticated AND not in demo mode
+  if (!isAuthenticated && !isDemoMode) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has a valid tenant context (hierarchical access control)
+  if (isAuthenticated && user && !user.tenantId && user.role !== 'super_admin') {
+    // User is authenticated but doesn't have tenant context - redirect to tenant selection
+    return <Navigate to="/select-tenant" replace />;
   }
 
   return <>{children}</>;
@@ -49,21 +58,30 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// Admin Only Route Component
+// Admin Only Route Component (Hierarchical Access Control)
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user, loading } = useSupabaseAuth();
+  const { isAuthenticated, user, loading, checkPermission } = useSupabaseAuth();
+  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
 
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  // MVP: Allow access in demo mode
+  if (!isAuthenticated && !isDemoMode) {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has admin role in user metadata
-  const userRole = user?.user_metadata?.role || 'user';
-  if (userRole !== 'admin') {
+  // Hierarchical access control - check if user has admin permissions
+  const userRole = user?.role || 'user';
+  const isSuperAdmin = userRole === 'super_admin';
+  const isTenantAdmin = userRole === 'tenant_admin';
+  const hasAdminPermissions = checkPermission('manage:tenants') || checkPermission('manage:users');
+
+  // Grant access if user is super admin, tenant admin, or has admin permissions
+  const isAdmin = isDemoMode || isSuperAdmin || isTenantAdmin || hasAdminPermissions;
+
+  if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -112,7 +130,9 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Layout>
-              <Dashboard />
+              <ErrorBoundary>
+                <Dashboard />
+              </ErrorBoundary>
             </Layout>
           </ProtectedRoute>
         }
@@ -124,7 +144,9 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Layout>
-              <FormsList />
+              <ErrorBoundary>
+                <FormsList />
+              </ErrorBoundary>
             </Layout>
           </ProtectedRoute>
         }
@@ -134,7 +156,9 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Layout>
-              <FormBuilder />
+              <ErrorBoundary>
+                <FormBuilder />
+              </ErrorBoundary>
             </Layout>
           </ProtectedRoute>
         }
@@ -269,19 +293,21 @@ const AppRoutes: React.FC = () => {
 
 function App() {
   return (
-    <SupabaseAuthProvider>
-      <SocketProvider>
-        <FormsProvider>
-          <SubmissionsProvider>
-            <Router>
-              <div className="App">
-                <AppRoutes />
-              </div>
-            </Router>
-          </SubmissionsProvider>
-        </FormsProvider>
-      </SocketProvider>
-    </SupabaseAuthProvider>
+    <ErrorBoundary>
+      <SupabaseAuthProvider>
+        <SocketProvider>
+          <FormsProvider>
+            <SubmissionsProvider>
+              <Router>
+                <div className="App">
+                  <AppRoutes />
+                </div>
+              </Router>
+            </SubmissionsProvider>
+          </FormsProvider>
+        </SocketProvider>
+      </SupabaseAuthProvider>
+    </ErrorBoundary>
   );
 }
 
