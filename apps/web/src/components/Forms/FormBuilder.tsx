@@ -282,6 +282,7 @@ const FormBuilder: React.FC = () => {
                             value={field.type}
                             onChange={(e) => updateField(index, { type: e.target.value as any })}
                             className="form-select"
+                            aria-label="Field type"
                           >
                             {fieldTypes.map((type) => (
                               <option key={type.value} value={type.value}>

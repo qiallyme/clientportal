@@ -152,7 +152,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         payload: error.message || 'Failed to fetch forms',
       });
     }
-  }, []);
+  }, []); // Empty dependency array to make it stable
 
   const fetchForm = useCallback(async (id: string) => {
     try {
@@ -197,8 +197,11 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
       dispatch({ type: 'FORMS_LOADING' });
       const newForm = await supabaseFormsAPI.createForm(formData);
       
-      // Refresh forms list
-      await fetchForms();
+      // Refresh forms list with current pagination
+      await fetchForms({
+        page: state.pagination.page,
+        limit: state.pagination.limit,
+      });
       
       return newForm;
     } catch (error: any) {
@@ -208,7 +211,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  }, [fetchForms]);
+  }, [fetchForms, state.pagination.page, state.pagination.limit]);
 
   const updateForm = useCallback(async (id: string, formData: Partial<Form>): Promise<Form> => {
     try {
@@ -225,8 +228,11 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         });
       }
       
-      // Refresh forms list
-      await fetchForms();
+      // Refresh forms list with current pagination
+      await fetchForms({
+        page: state.pagination.page,
+        limit: state.pagination.limit,
+      });
       
       return formWithCount;
     } catch (error: any) {
@@ -236,7 +242,7 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  }, [fetchForms, state.currentForm?._id]);
+  }, [fetchForms, state.currentForm?._id, state.pagination.page, state.pagination.limit]);
 
   const deleteForm = useCallback(async (id: string) => {
     try {
@@ -248,15 +254,18 @@ export const FormsProvider: React.FC<FormsProviderProps> = ({ children }) => {
         dispatch({ type: 'CLEAR_CURRENT_FORM' });
       }
       
-      // Refresh forms list
-      await fetchForms();
+      // Refresh forms list with current pagination
+      await fetchForms({
+        page: state.pagination.page,
+        limit: state.pagination.limit,
+      });
     } catch (error: any) {
       dispatch({
         type: 'FORMS_ERROR',
         payload: error.message || 'Failed to delete form',
       });
     }
-  }, [fetchForms, state.currentForm?._id]);
+  }, [fetchForms, state.currentForm?._id, state.pagination.page, state.pagination.limit]);
 
   const clearCurrentForm = useCallback(() => {
     dispatch({ type: 'CLEAR_CURRENT_FORM' });
